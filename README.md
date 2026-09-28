@@ -1,18 +1,28 @@
 # cjanerun.store – waitlist test site
 
-A static site for testing CJane Run concepts with Meta ads. Visitors join a
-Klaviyo waitlist, and their answers (role, which product first, sport, ad UTM
-tags) are saved on their Klaviyo profile.
+A static site for a Meta ad test of CJane Run's stick packs. Visitors join a
+Klaviyo waitlist, and their answers (role, how often they'd use it, sport, ad
+UTM tags) are saved on their Klaviyo profile along with `signup_page`.
 
-| Page | Purpose |
-|---|---|
-| `/` | Home – shows both formats and asks which one they'd reach for |
-| `/sticks/` | Ad test A – Before/After stick packs + protein balls |
-| `/bottles/` | Ad test B – Strawberry Cream + Matcha Cream bottles |
-| `/privacy/` | Privacy policy |
+## The test (2x2)
 
-The test pages don't link to each other (the logo scrolls to the top), so
-visitors from a sticks ad never see the bottles page and vice versa.
+| Page | `signup_page` | Cell |
+|---|---|---|
+| `/pre/` | `cjr_pre` | Pre-workout – CJane Run Before stick |
+| `/hydrate/` | `generic_pre` | Pre-workout – "Everyday Hydration Mix" (neutral, Liquid IV-style control) |
+| `/post/` | `cjr_post` | Post-workout – CJane Run After stick |
+| `/recover/` | `generic_post` | Post-workout – "Everyday Recovery Mix" (neutral, Vital Proteins-style control) |
+| `/` | `home` | CJane Run home – organic traffic, not an ad cell |
+| `/privacy/` | – | Privacy policy |
+
+All four ad pages share the same layout, form, questions, flavors and
+nutrition – only the brand and positioning change. They don't link to each
+other (the logo scrolls to the top), so each ad's visitors stay in their cell.
+"Everyday" is a made-up neutral brand; its pages disclose in the footer and
+consent line that it's a concept being tested by CJane Run. Its ads should run
+from a separate, neutral Facebook Page so the CJane Run name doesn't appear.
+
+Old `/sticks/` and `/bottles/` links redirect to `/` (see `public/_redirects`).
 
 ## Before launch
 
@@ -23,7 +33,7 @@ visitors from a sticks ad never see the bottles page and vice versa.
      (Lists & Segments > list > Settings > Opt-in process).
 2. **Meta Pixel** – create a pixel in Events Manager and paste its ID into
    `public/assets/config.js`. The site fires `PageView` on load and one `Lead`
-   per visit on signup, with `content_name` = `home`, `sticks` or `bottles`.
+   per visit on signup, with `content_name` = the page's `signup_page` value.
    - Verify the domain in Business Settings > Brand safety > Domains (add the
      DNS TXT record in Cloudflare).
 3. **Contact email** – the site lists `hello@cjanerun.store`. Turn on
@@ -36,7 +46,7 @@ visitors from a sticks ad never see the bottles page and vice versa.
 Tag every ad's URL so signups show which ad they came from:
 
 ```
-https://cjanerun.store/sticks/?utm_source=meta&utm_medium=paid&utm_campaign=cjr_concept_test&utm_content=AD_NAME
+https://cjanerun.store/pre/?utm_source=meta&utm_medium=paid&utm_campaign=cjr_stick_test&utm_content=AD_NAME
 ```
 
 ## Editing
@@ -47,7 +57,7 @@ Page copy lives in `tools/build.py`. After editing, rebuild:
 python tools/build.py
 ```
 
-Product illustrations: `tools/make_art.py`. Favicons and share image:
+Stick illustrations: `tools/make_art.py`. Favicons and share image:
 `tools/make_images.py` (uses headless Edge).
 
 ## Deploying (Cloudflare Workers static assets)

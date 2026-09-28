@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 IMG = ROOT / "public" / "assets" / "images"
@@ -45,7 +45,7 @@ def shoot(html, w, h, out):
 
 art = lambda n: (IMG / n).as_uri()
 
-og = f"""<!doctype html><html><head>{FONTS}<style>
+og = f"""<!doctype html><html><head><meta charset="utf-8">{FONTS}<style>
 body{{margin:0;width:1200px;height:630px;background:#1B2030;color:#fff;font-family:'DM Sans';display:flex;align-items:center;overflow:hidden;position:relative}}
 .txt{{padding-left:80px;width:560px}}
 h1{{font-family:Montserrat;font-weight:700;font-size:92px;line-height:1.02;margin:28px 0 0;letter-spacing:-1px}}
@@ -60,29 +60,61 @@ p{{font-size:28px;color:#C9CCD8;margin:22px 0 0;line-height:1.35}}
 <p>Great-tasting sports nutrition built around how you actually train.</p>
 <div class="url">JOIN THE WAITLIST · CJANERUN.STORE</div></div>
 <div class="art"><div class="glow"></div>
-<img src="{art('stick-before.svg')}" style="height:420px;left:10px;transform:rotate(-9deg)">
-<img src="{art('stick-after.svg')}" style="height:420px;left:120px;transform:rotate(4deg)">
-<img src="{art('bottle-before.svg')}" style="height:400px;right:10px;transform:rotate(5deg)">
+<img src="{art('stick-before.svg')}" style="height:440px;left:70px;transform:rotate(-9deg)">
+<img src="{art('stick-after.svg')}" style="height:440px;left:230px;transform:rotate(6deg)">
 </div></body></html>"""
 
-icon = f"""<!doctype html><html><head><style>body{{margin:0;background:transparent}}svg{{display:block}}</style></head>
-<body>{badge(512, text=False)}</body></html>"""
+EVERYDAY_FONTS = '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=block" rel="stylesheet">'
+EVERYDAY_MARK = """<svg width="{size}" height="{size}" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#2BA8B8"/>
+<path d="M11 22c3-4 6-4 9 0s6 4 9 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>"""
 
-shoot(og, 1200, 630, IMG / "og-share.png")
-shoot(icon, 512, 512, IMG / "icon-512.png")
+og_everyday = f"""<!doctype html><html><head><meta charset="utf-8">{EVERYDAY_FONTS}<style>
+body{{margin:0;width:1200px;height:630px;background:#12414D;color:#fff;font-family:Inter;display:flex;align-items:center;overflow:hidden;position:relative}}
+.txt{{padding-left:80px;width:560px}}
+.brand{{display:flex;align-items:center;gap:14px;font-weight:700;font-size:40px}}
+h1{{font-weight:700;font-size:84px;line-height:1.04;margin:34px 0 0;letter-spacing:-2px}}
+h1 span{{color:#E9783E}}
+p{{font-size:28px;color:#CFE3E8;margin:22px 0 0;line-height:1.35}}
+.url{{font-weight:700;font-size:20px;letter-spacing:.14em;color:#F5B48F;margin-top:34px}}
+.art{{position:absolute;right:40px;bottom:40px;width:470px;height:520px}}
+.art img{{position:absolute;bottom:0;filter:drop-shadow(0 18px 24px rgba(0,0,0,.35))}}
+.glow{{position:absolute;inset:10% 0 0;border-radius:50%;background:radial-gradient(closest-side,rgba(43,168,184,.35),transparent)}}
+</style></head><body>
+<div class="txt"><div class="brand">{EVERYDAY_MARK.format(size=56)}everyday</div>
+<h1>Simple, everyday <span>essentials.</span></h1>
+<p>Easy drink mixes for hydration and recovery.</p>
+<div class="url">JOIN THE WAITLIST</div></div>
+<div class="art"><div class="glow"></div>
+<img src="{art('stick-everyday-hydration.svg')}" style="height:440px;left:70px;transform:rotate(-9deg)">
+<img src="{art('stick-everyday-recovery.svg')}" style="height:440px;left:230px;transform:rotate(6deg)">
+</div></body></html>"""
 
-# Round the square screenshot into a transparent circle, then size the icons.
-src = Image.open(IMG / "icon-512.png").convert("RGBA")
-mask = Image.new("L", src.size, 0)
-from PIL import ImageDraw
-ImageDraw.Draw(mask).ellipse((1, 1, 510, 510), fill=255)
-src.putalpha(mask)
-src.resize((32, 32), Image.LANCZOS).save(IMG / "favicon-32.png")
-# Apple touch icons shouldn't be transparent – put the badge on navy.
-touch = Image.new("RGBA", (512, 512), "#1B2030")
-touch.alpha_composite(src)
-touch.convert("RGB").resize((180, 180), Image.LANCZOS).save(IMG / "apple-touch-icon.png")
-(IMG / "icon-512.png").unlink()
-og_img = Image.open(IMG / "og-share.png").convert("RGB")
-og_img.save(IMG / "og-share.png", optimize=True)
-print("wrote og-share.png, favicon-32.png, apple-touch-icon.png")
+
+def make_icons(mark_html, bg, favicon_name, touch_name):
+    page = f"""<!doctype html><html><head><style>body{{margin:0;background:transparent}}svg{{display:block}}</style></head>
+<body>{mark_html}</body></html>"""
+    tmp = IMG / "icon-512.png"
+    shoot(page, 512, 512, tmp)
+    # Round the square screenshot into a transparent circle, then size the icons.
+    src = Image.open(tmp).convert("RGBA")
+    mask = Image.new("L", src.size, 0)
+    ImageDraw.Draw(mask).ellipse((1, 1, 510, 510), fill=255)
+    src.putalpha(mask)
+    src.resize((32, 32), Image.LANCZOS).save(IMG / favicon_name)
+    # Apple touch icons shouldn't be transparent – put the mark on the brand color.
+    touch = Image.new("RGBA", (512, 512), bg)
+    touch.alpha_composite(src)
+    touch.convert("RGB").resize((180, 180), Image.LANCZOS).save(IMG / touch_name)
+    tmp.unlink()
+
+
+def save_og(html, name):
+    shoot(html, 1200, 630, IMG / name)
+    Image.open(IMG / name).convert("RGB").save(IMG / name, optimize=True)
+
+
+save_og(og, "og-share.png")
+save_og(og_everyday, "og-everyday.png")
+make_icons(badge(512, text=False), "#1B2030", "favicon-32.png", "apple-touch-icon.png")
+make_icons(EVERYDAY_MARK.format(size=512), "#12414D", "everyday-favicon-32.png", "everyday-touch-icon.png")
+print("wrote OG images and favicons for CJane Run and Everyday")

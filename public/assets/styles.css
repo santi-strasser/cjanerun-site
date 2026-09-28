@@ -118,18 +118,13 @@ h2 { font-size: clamp(30px, 4.2vw, 46px); font-weight: 700; }
   background: radial-gradient(closest-side, rgba(224, 122, 147, .28), transparent);
 }
 
-/* sticks + snack arrangement */
-.art-sticks .s1 { height: 88%; left: 12%; transform: rotate(-8deg); }
-.art-sticks .s2 { height: 88%; left: 32%; transform: rotate(5deg); }
-.art-sticks .pouch { height: 62%; right: 4%; }
-/* bottle arrangement */
-.art-bottles .b1 { height: 94%; left: 16%; transform: rotate(-4deg); }
-.art-bottles .b2 { height: 94%; right: 16%; transform: rotate(4deg); }
-/* home: one of each format */
-.art-home .s1 { height: 80%; left: 6%; transform: rotate(-9deg); }
-.art-home .s2 { height: 80%; left: 25%; transform: rotate(3deg); }
-.art-home .b1 { height: 90%; right: 22%; transform: rotate(-3deg); }
-.art-home .b2 { height: 90%; right: 2%; transform: rotate(5deg); }
+/* home: one Before + one After stick */
+.art-pair .s1 { height: 86%; left: 20%; transform: rotate(-8deg); }
+.art-pair .s2 { height: 86%; left: 46%; transform: rotate(6deg); }
+/* single-product pages: three of the same stick, fanned */
+.art-single .s1 { height: 78%; left: 12%; transform: rotate(-12deg); }
+.art-single .s2 { height: 90%; left: 37%; z-index: 1; }
+.art-single .s3 { height: 78%; left: 62%; transform: rotate(12deg); }
 
 /* ---------- Forms ---------- */
 
@@ -169,6 +164,7 @@ h2 { font-size: clamp(30px, 4.2vw, 46px); font-weight: 700; }
 
 fieldset { border: 0; padding: 0; margin: 18px 0 0; }
 legend { font-weight: 700; font-size: 15px; margin-bottom: 10px; }
+legend .optional { font-weight: 400; color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip input { position: absolute; opacity: 0; pointer-events: none; }
 .chip span {
@@ -191,6 +187,8 @@ legend { font-weight: 700; font-size: 15px; margin-bottom: 10px; }
 .belief { background: var(--white); border-radius: var(--radius); padding: 30px; box-shadow: 0 1px 2px rgba(27, 32, 48, .06); }
 .belief .dot { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 18px; }
 .belief .dot svg { width: 22px; height: 22px; }
+.dot-1 { background: #FBE4EA; } .dot-2 { background: #ECE8F7; } .dot-3 { background: #E3EFE9; }
+.belief .dot { color: var(--navy); }
 .belief h3 { font-size: 21px; margin-bottom: 8px; }
 .belief p { margin: 0; color: var(--muted); }
 
@@ -212,19 +210,18 @@ legend { font-weight: 700; font-size: 15px; margin-bottom: 10px; }
 
 .m-before .product-art { background: #FBE4EA; } .m-before .moment { color: #C9627C; }
 .m-after .product-art { background: #ECE8F7; } .m-after .moment { color: #7A6DB3; }
-.m-snack .product-art { background: #E3EFE9; } .m-snack .moment { color: #4F7F69; }
+.m-hydration .product-art { background: #E1F2F6; } .m-hydration .moment { color: #1F7F8C; }
+.m-recovery .product-art { background: #F6EDDF; } .m-recovery .moment { color: #9A6B2F; }
+
+.product.feature { display: grid; grid-template-columns: 1fr 1fr; margin-top: 44px; }
+.product.feature .product-art { height: auto; min-height: 380px; padding: 40px; }
+.product.feature .product-art img { height: 300px; }
+.product.feature .product-body { padding: 44px 44px 48px; align-self: center; }
+.product.feature h3 { font-size: 30px; }
+.product.feature .how { font-size: 18px; }
+.product.feature dl { font-size: 16px; gap: 14px; }
 
 .concept-note { margin: 28px 0 0; font-size: 14px; color: var(--muted); }
-
-/* ---------- Format chooser (home) ---------- */
-
-.format-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 44px; }
-.format { background: var(--paper); border-radius: var(--radius); padding: 30px; }
-.format-art { height: 230px; display: flex; justify-content: center; align-items: flex-end; gap: 14px; margin-bottom: 24px; }
-.format-art img { height: 100%; width: auto; }
-.format-art .short { height: 72%; }
-.format h3 { font-size: 24px; margin-bottom: 8px; }
-.format p { margin: 0; color: var(--muted); }
 
 /* ---------- Join ---------- */
 
@@ -265,6 +262,31 @@ legend { font-weight: 700; font-size: 15px; margin-bottom: 10px; }
 .legal p, .legal li { color: #3A3F50; }
 .legal .updated { color: var(--muted); margin: 0 0 24px; }
 
+/* ---------- Everyday (neutral control brand) ---------- */
+
+.theme-everyday {
+  --navy: #12414D;
+  --navy-2: #1A5261;
+  --pink: #E9783E;
+  --pink-soft: #F5B48F;
+  --paper: #F4F8F9;
+  --muted: #56666C;
+  --line: #DCE5E8;
+  --display: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --body: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+.theme-everyday .topbar { background: rgba(18, 65, 77, .97); }
+.theme-everyday .brand-name { letter-spacing: 0; font-size: 20px; text-transform: none; }
+.theme-everyday .btn:hover { background: #D6662D; }
+.theme-everyday .hero .lede, .theme-everyday .join .lede { color: #CFE3E8; }
+.theme-everyday .hero-note, .theme-everyday .hero .fineprint, .theme-everyday .footer { color: #A6C3CA; }
+.theme-everyday .perks li { color: #DDEBEE; }
+.theme-everyday .hero-art .glow { background: radial-gradient(closest-side, rgba(43, 168, 184, .35), transparent); }
+.theme-everyday .input:focus, .theme-everyday .select:focus { outline-color: rgba(233, 120, 62, .35); }
+.theme-everyday .chip input:checked + span { background: #FDEBDF; }
+.theme-everyday .dot-1 { background: #E1F2F6; } .theme-everyday .dot-2 { background: #FDEBDF; } .theme-everyday .dot-3 { background: #F6EDDF; }
+.theme-everyday h1, .theme-everyday h2, .theme-everyday h3 { letter-spacing: -.02em; }
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 860px) {
@@ -273,11 +295,14 @@ legend { font-weight: 700; font-size: 15px; margin-bottom: 10px; }
   .hero-badge { display: none; }
   .hero-art { height: 240px; order: -1; margin: 0 auto; width: min(100%, 360px); }
   .section { padding: 64px 0; }
-  .beliefs-grid, .product-grid, .product-grid.two, .format-grid { grid-template-columns: 1fr; }
+  .beliefs-grid, .product-grid, .product-grid.two, .product.feature { grid-template-columns: 1fr; }
+  .product.feature .product-art { min-height: 0; height: 260px; padding: 24px; }
+  .product.feature .product-art img { height: 100%; }
+  .product.feature .product-body { padding: 26px 28px 30px; }
+  .product.feature h3 { font-size: 24px; }
   .join .wrap { grid-template-columns: 1fr; gap: 28px; }
   .join-card { padding: 24px; }
   .product-art { height: 220px; }
-  .format-art { height: 190px; }
   .brand-name { font-size: 13px; letter-spacing: .22em; }
 }
 
