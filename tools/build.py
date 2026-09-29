@@ -197,6 +197,7 @@ def head(page, brand):
 <meta name="twitter:description" content="{page['description']}">
 <meta name="twitter:image" content="{SITE}/assets/images/{brand['og_image']}">
 <meta name="theme-color" content="{brand['theme_color']}">
+<meta name="facebook-domain-verification" content="c9epdgrilqn1eqrvwwe9vn37ud9xhx" />
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/{brand['favicon']}">
 <link rel="apple-touch-icon" href="/assets/images/{brand['touch_icon']}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
