@@ -36,9 +36,14 @@ Old `/sticks/` and `/bottles/` links redirect to `/` (see `public/_redirects`).
    per visit on signup, with `content_name` = the page's `signup_page` value.
    - Verify the domain in Business Settings > Brand safety > Domains (add the
      DNS TXT record in Cloudflare).
-3. **Contact email** – the site lists `hello@cjanerun.store`. Turn on
+3. **Google Analytics 4** – paste the web stream's Measurement ID (`G-…`) into
+   `public/assets/config.js`. Pages report by path (`/pre/`, `/hydrate/`,
+   `/post/`, `/recover/`); signups send one `generate_lead` event per visit
+   with `signup_page`. In GA, mark `generate_lead` as a key event and register
+   `signup_page` as an event-scoped custom dimension.
+4. **Contact email** – the site lists `hello@cjanerun.store`. Turn on
    Cloudflare Email Routing for the domain and forward it to your inbox.
-4. **Privacy policy** – `tools/build.py` has a plain-language draft. Have it
+5. **Privacy policy** – `tools/build.py` has a plain-language draft. Have it
    reviewed before spending on ads.
 
 ## Ad links

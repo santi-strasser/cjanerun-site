@@ -102,7 +102,10 @@
           if (!res.ok) throw new Error('Klaviyo ' + res.status);
           saveAnswers(email, answers);
           // One Lead per visit – the join form often follows a hero signup.
-          if (window.fbq && !leadTracked) window.fbq('track', 'Lead', { content_name: LANDING });
+          if (!leadTracked) {
+            if (window.fbq) window.fbq('track', 'Lead', { content_name: LANDING });
+            if (window.gtag) window.gtag('event', 'generate_lead', { signup_page: LANDING });
+          }
           leadTracked = true;
 
           form.reset();
