@@ -7,5 +7,5 @@ window.CJR_CONFIG = {
   // Meta Events Manager > Data sources > your pixel > Pixel ID (15–16 digits)
   metaPixelId: '4846417198919525',
   // Google Analytics > Admin > Data streams > your web stream > Measurement ID (G-…)
-  ga4MeasurementId: ''
+  ga4MeasurementId: 'G-YRQLZNN803'
 };
