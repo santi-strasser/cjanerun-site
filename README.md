@@ -1,28 +1,26 @@
 # cjanerun.store – waitlist test site
 
 A static site for a Meta ad test of CJane Run's stick packs. Visitors join a
-Klaviyo waitlist, and their answers (role, how often they'd use it, sport, ad
-UTM tags) are saved on their Klaviyo profile along with `signup_page`.
+Klaviyo waitlist with just their email; the page they signed up on
+(`signup_page`) and the ad's UTM tags are saved on their Klaviyo profile.
 
-## The test (2x2)
+## The test
 
 | Page | `signup_page` | Cell |
 |---|---|---|
-| `/pre/` | `cjr_pre` | Pre-workout – CJane Run Before stick |
-| `/hydrate/` | `generic_pre` | Pre-workout – "Everyday Hydration Mix" (neutral, Liquid IV-style control) |
-| `/post/` | `cjr_post` | Post-workout – CJane Run After stick |
-| `/recover/` | `generic_post` | Post-workout – "Everyday Recovery Mix" (neutral, Vital Proteins-style control) |
-| `/` | `home` | CJane Run home – organic traffic, not an ad cell |
+| `/` | `cjr` | CJane Run – Before + After sticks |
+| `/everyday/` | `everyday` | "Everyday" Hydration Mix + Recovery Mix (neutral control brand) |
 | `/privacy/` | – | Privacy policy |
 
-All four ad pages share the same layout, form, questions, flavors and
-nutrition – only the brand and positioning change. They don't link to each
-other (the logo scrolls to the top), so each ad's visitors stay in their cell.
-"Everyday" is a made-up neutral brand; its pages disclose in the footer and
-consent line that it's a concept being tested by CJane Run. Its ads should run
-from a separate, neutral Facebook Page so the CJane Run name doesn't appear.
+Both ad pages share the same layout and email-only form – only the brand,
+positioning and formulas change. They don't link to each other (the logo
+scrolls to the top), so each ad's visitors stay in their cell. "Everyday" is a
+made-up neutral brand; its page discloses in the footer and consent line that
+it's a concept being tested by CJane Run. Its ads should run from a separate,
+neutral Facebook Page so the CJane Run name doesn't appear.
 
-Old `/sticks/` and `/bottles/` links redirect to `/` (see `public/_redirects`).
+Old `/pre/`, `/post/`, `/sticks/` and `/bottles/` links redirect to `/`, and
+`/hydrate/` and `/recover/` to `/everyday/` (see `public/_redirects`).
 
 ## Before launch
 
@@ -37,8 +35,8 @@ Old `/sticks/` and `/bottles/` links redirect to `/` (see `public/_redirects`).
    - Verify the domain in Business Settings > Brand safety > Domains (add the
      DNS TXT record in Cloudflare).
 3. **Google Analytics 4** – paste the web stream's Measurement ID (`G-…`) into
-   `public/assets/config.js`. Pages report by path (`/pre/`, `/hydrate/`,
-   `/post/`, `/recover/`); signups send one `generate_lead` event per visit
+   `public/assets/config.js`. Pages report by path (`/` and `/everyday/`);
+   signups send one `generate_lead` event per visit
    with `signup_page`. In GA, mark `generate_lead` as a key event and register
    `signup_page` as an event-scoped custom dimension.
 4. **Contact email** – the site lists `hello@cjanerun.store`. Turn on
@@ -51,7 +49,7 @@ Old `/sticks/` and `/bottles/` links redirect to `/` (see `public/_redirects`).
 Tag every ad's URL so signups show which ad they came from:
 
 ```
-https://cjanerun.store/pre/?utm_source=meta&utm_medium=paid&utm_campaign=cjr_stick_test&utm_content=AD_NAME
+https://cjanerun.store/?utm_source=meta&utm_medium=paid&utm_campaign=cjr_stick_test&utm_content=AD_NAME
 ```
 
 ## Editing
@@ -64,7 +62,7 @@ python tools/build.py
 
 Facts panels: `tools/nutrition.py` holds the draft ingredient build for each
 product, calculates the label values with FDA rounding and draws the panels
-that `build.py` puts on the four ad pages. They are estimates, not lab
+that `build.py` puts under each product. They are estimates, not lab
 results. `python tools/nutrition.py --export DIR` saves them as PNGs.
 
 Product images are 3D renders: `python tools/make_renders.py` draws the stick

@@ -1,18 +1,16 @@
 """Builds the landing pages into public/.
 
-The Meta test is a 2x2: CJane Run vs a neutral control brand ("Everyday"),
-for a pre-workout stick and a post-workout stick. All four test pages share
-the same layout, form, questions, flavors and nutrition – only the brand and
-positioning change. Edit copy here, then run:
+The Meta test compares two brands, one landing page each: CJane Run and a
+neutral control brand ("Everyday"). Both pages share the same layout, form,
+flavors and structure – only the brand, positioning and formulas change. Each
+page shows its two stick packs (before/after a workout) with a draft facts
+panel. Edit copy here, then run:
     python tools/build.py
 
 Pages:
-  /           CJane Run home – both sticks (organic traffic, not an ad cell)
-  /pre/       Ad cell: pre-workout, CJane Run Before stick
-  /hydrate/   Ad cell: pre-workout, Everyday Hydration Mix (Liquid IV-style control)
-  /post/      Ad cell: post-workout, CJane Run After stick
-  /recover/   Ad cell: post-workout, Everyday Recovery Mix (Vital Proteins-style control)
-  /privacy/   Privacy policy
+  /            Ad cell: CJane Run – Before + After sticks
+  /everyday/   Ad cell: Everyday – Hydration Mix + Recovery Mix (control)
+  /privacy/    Privacy policy
 """
 from pathlib import Path
 
@@ -22,20 +20,6 @@ ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
 SITE = "https://cjanerun.store"
 CONTACT = "hello@cjanerun.store"
-
-ROLES = [
-    "Athlete (18+)",
-    "Athlete (13–17)",
-    "Parent of an athlete",
-    "Coach or trainer",
-    "Other",
-]
-
-# Asked on every ad cell, so desire can be compared like-for-like.
-USE_FREQ = {
-    "name": "use_freq", "legend": "How often would you use it?",
-    "options": ["Every practice or workout", "A few times a week", "Game or race days only", "Not sure yet"],
-}
 
 # ---------------------------------------------------------------- brand marks
 
@@ -140,7 +124,7 @@ BRANDS = {
 # ---------------------------------------------------------------- products
 
 CJR_BEFORE = {
-    "cls": "m-before", "moment": "BEFORE", "name": "Performance stick", "img": "pack-before-single.webp", "panel": "cjr-before",
+    "cls": "m-before", "moment": "BEFORE", "name": "Performance stick", "img": "pack-before-single.webp", "panel": "cjr-before", "inside_title": "What’s inside the Before stick",
     "alt": "Pink CJane Run Before stick pack, strawberry",
     "how": "Tear, pour into water and shake about 30 minutes before practice or a game.",
     "facts": [
@@ -149,7 +133,7 @@ CJR_BEFORE = {
     ],
 }
 CJR_AFTER = {
-    "cls": "m-after", "moment": "AFTER", "name": "Recovery stick", "img": "pack-after-single.webp", "panel": "cjr-after",
+    "cls": "m-after", "moment": "AFTER", "name": "Recovery stick", "img": "pack-after-single.webp", "panel": "cjr-after", "inside_title": "What’s inside the After stick",
     "alt": "Lavender CJane Run After stick pack, matcha",
     "how": "Mix with water, or blend into a smoothie after training.",
     "facts": [
@@ -158,7 +142,7 @@ CJR_AFTER = {
     ],
 }
 EVERYDAY_HYDRATION = {
-    "cls": "m-hydration", "moment": "HYDRATION", "name": "Everyday Hydration Mix", "img": "pack-hydration-single.webp", "panel": "everyday-hydration",
+    "cls": "m-hydration", "moment": "HYDRATION", "name": "Everyday Hydration Mix", "img": "pack-hydration-single.webp", "panel": "everyday-hydration", "inside_title": "What’s inside Hydration Mix",
     "alt": "Light blue Everyday Hydration Mix stick pack, strawberry",
     "how": "Tear, pour into water and shake – anytime you need to rehydrate.",
     "facts": [
@@ -167,7 +151,7 @@ EVERYDAY_HYDRATION = {
     ],
 }
 EVERYDAY_RECOVERY = {
-    "cls": "m-recovery", "moment": "RECOVERY", "name": "Everyday Recovery Mix", "img": "pack-recovery-single.webp", "panel": "everyday-recovery",
+    "cls": "m-recovery", "moment": "RECOVERY", "name": "Everyday Recovery Mix", "img": "pack-recovery-single.webp", "panel": "everyday-recovery", "inside_title": "What’s inside Recovery Mix",
     "alt": "Sand-colored Everyday Recovery Mix stick pack, matcha",
     "how": "Mix with water, or blend into a smoothie or your morning coffee.",
     "facts": [
@@ -224,13 +208,6 @@ def topbar(brand, home_href, join_href="#join"):
 """
 
 
-def role_select():
-    opts = "".join(f"<option>{r}</option>" for r in ROLES)
-    return f"""<select class="select" name="role" required aria-label="I am a…">
-        <option value="" disabled selected>I am a…</option>{opts}
-      </select>"""
-
-
 HONEYPOT = '<label class="hp-field" aria-hidden="true"><input type="checkbox" name="website" tabindex="-1"> Leave empty</label>'
 
 
@@ -241,6 +218,19 @@ def fineprint(brand):
     )
 
 
+def waitlist_form(brand):
+    """Email is the only thing we ask for."""
+    return f"""<form class="waitlist-form">
+        <div class="field-row">
+          <input class="input" type="email" name="email" placeholder="Your email" autocomplete="email" required aria-label="Email address">
+          <button class="btn" type="submit">Join the waitlist</button>
+        </div>
+        {HONEYPOT}
+        <p class="form-status" role="status" aria-live="polite"></p>
+        {fineprint(brand)}
+      </form>"""
+
+
 def hero(page, brand):
     return f"""<section class="hero">
   <div class="wrap">
@@ -249,16 +239,7 @@ def hero(page, brand):
       <p class="eyebrow">Coming soon</p>
       <h1>{page['h1']}</h1>
       <p class="lede">{page['hero_lede']}</p>
-      <form class="waitlist-form" data-hero>
-        <div class="field-row">
-          <input class="input" type="email" name="email" placeholder="Your email" autocomplete="email" required aria-label="Email address">
-          {role_select()}
-        </div>
-        {HONEYPOT}
-        <button class="btn" type="submit">Join the waitlist</button>
-        <p class="form-status" role="status" aria-live="polite"></p>
-        {fineprint(brand)}
-      </form>
+      {waitlist_form(brand)}
     </div>
     <div class="hero-art {page['art_class']}" aria-hidden="true">
       <div class="glow"></div>
@@ -296,20 +277,8 @@ def facts(p):
     return "".join(f"<div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in p["facts"])
 
 
-def product_card(p):
-    return f"""<article class="product {p['cls']}">
-        <div class="product-art"><img src="/assets/images/{p['img']}" alt="{p['alt']}"></div>
-        <div class="product-body">
-          <p class="moment">{p['moment']}</p>
-          <h3>{p['name']}</h3>
-          <p class="how">{p['how']}</p>
-          <dl>{facts(p)}</dl>
-        </div>
-      </article>"""
-
-
 def product_feature(p):
-    """One product, shown large – used on the single-product ad pages."""
+    """One product, shown large."""
     return f"""<article class="product feature {p['cls']}">
         <div class="product-art"><img src="/assets/images/{p['img']}" alt="{p['alt']}"></div>
         <div class="product-body">
@@ -330,7 +299,7 @@ def inside(p):
         for title, rows in nutrition.INSIDE[p["panel"]])
     return f"""<div class="inside">
       <div class="inside-copy">
-        <h3>What’s inside</h3>
+        <h3>{p['inside_title']}</h3>
         <p class="how">One stick, by the numbers.</p>
         {groups}
         <p class="inside-note">Draft formula. These values are estimates and may change before launch.</p>
@@ -342,11 +311,7 @@ def inside(p):
 
 
 def products(page):
-    items = page["products"]
-    if len(items) == 1:
-        body = product_feature(items[0]) + inside(items[0])
-    else:
-        body = f'<div class="product-grid two">{"".join(product_card(p) for p in items)}</div>'
+    body = "".join(product_feature(p) + inside(p) for p in page["products"])
     return f"""<section class="section products">
   <div class="wrap">
     <p class="eyebrow">What we’re building</p>
@@ -357,17 +322,6 @@ def products(page):
   </div>
 </section>
 """
-
-
-def chips(q):
-    items = "".join(
-        f'<label class="chip"><input type="radio" name="{q["name"]}" value="{v}"><span>{v}</span></label>'
-        for v in q["options"]
-    )
-    return f"""<fieldset>
-          <legend>{q['legend']}</legend>
-          <div class="chips">{items}</div>
-        </fieldset>"""
 
 
 def join(page, brand):
@@ -385,21 +339,7 @@ def join(page, brand):
       </ul>
     </div>
     <div class="join-card">
-      <form class="waitlist-form">
-        <div class="field-row">
-          <input class="input" type="email" name="email" placeholder="Your email" autocomplete="email" required aria-label="Email address">
-          {role_select()}
-        </div>
-        {chips(page['question'])}
-        <fieldset>
-          <legend>What’s your sport? <span class="optional">(optional)</span></legend>
-          <input class="input" type="text" name="sport" placeholder="e.g. soccer, volleyball, running" maxlength="60" autocomplete="off">
-        </fieldset>
-        {HONEYPOT}
-        <button class="btn" type="submit">Join the waitlist</button>
-        <p class="form-status" role="status" aria-live="polite"></p>
-        {fineprint(brand)}
-      </form>
+      {waitlist_form(brand)}
     </div>
   </div>
 </section>
@@ -443,13 +383,12 @@ def render(name):
 
 
 CAFFEINE_ANSWER = "Our current draft has about 90mg per stick – roughly a cup of coffee. We’re also testing a caffeine-free version. Tell us what you’d prefer when you join – it will shape what we make."
-NO_CAFFEINE_ANSWER = "No. The current draft formula is caffeine-free."
 TEEN_ANSWER = "We’re developing every product with age-appropriate expert guidance, and we’ll share full ingredient lists before launch. Food, water and rest come first – we’re here to make fueling easier, not replace it."
 PROTEIN_ANSWER = "A complete, non-dairy protein – 20g per stick. Our current draft uses a pea and rice blend, and we’ll share the full ingredient list before launch."
 
 PAGES = [
     {
-        "file": "index.html", "path": "/", "landing": "home", "brand": "cjr",
+        "file": "index.html", "path": "/", "landing": "cjr", "brand": "cjr",
         "title": "CJane Run – Fuel what’s next.",
         "description": "Great-tasting sports nutrition built around how you actually train. CJane Run is coming soon – join the waitlist.",
         "h1": 'Fuel what’s <span class="accent">next.</span>',
@@ -459,72 +398,36 @@ PAGES = [
         "products": [CJR_BEFORE, CJR_AFTER],
         "products_title": "Two moments. One routine.",
         "products_lede": "Light sticks you mix with water – one before practice, one after. Both fit in your gym bag.",
-        "question": {"name": "first_pick", "legend": "Which would you try first?", "options": ["Before stick", "After stick", "Both"]},
-        "faq": [("Will the Before stick have caffeine?", CAFFEINE_ANSWER), ("Is it right for teen athletes?", TEEN_ANSWER)],
+        "faq": [
+            ("Will the Before stick have caffeine?", CAFFEINE_ANSWER),
+            ("What kind of protein is in the After stick?", PROTEIN_ANSWER),
+            ("Is it right for teen athletes?", TEEN_ANSWER),
+        ],
     },
     {
-        "file": "pre/index.html", "path": "/pre/", "landing": "cjr_pre", "brand": "cjr",
-        "title": "CJane Run Before stick – Fuel what’s next.",
-        "description": "Great-tasting pre-practice fuel built around how you actually train. Join the CJane Run waitlist.",
-        "h1": 'Fuel what’s <span class="accent">next.</span>',
-        "hero_lede": "The Before stick: great-tasting pre-practice fuel built around how you actually train. Tear, pour, shake – 30 minutes before you play.",
+        "file": "everyday/index.html", "path": "/everyday/", "landing": "everyday", "brand": "everyday",
+        "title": "Everyday – Hydration and Recovery Mixes",
+        "description": "Easy drink mixes for everyday hydration and recovery. Join the waitlist.",
+        "h1": 'Hydration and recovery, made <span class="accent">easy.</span>',
+        "hero_lede": "Everyday drink mixes for busy days: a Hydration Mix with electrolytes and a Recovery Mix with protein. Tear, pour, shake – anytime, anywhere.",
         "art_class": "art-render",
-        "hero_art": render("pack-before-hero"),
-        "products": [CJR_BEFORE],
-        "products_title": "Meet the Before stick.",
-        "products_lede": "Light enough for your gym bag, easy enough to mix on the way to practice.",
-        "question": USE_FREQ,
-        "faq": [("Will the Before stick have caffeine?", CAFFEINE_ANSWER), ("Is it right for teen athletes?", TEEN_ANSWER)],
-    },
-    {
-        "file": "post/index.html", "path": "/post/", "landing": "cjr_post", "brand": "cjr",
-        "title": "CJane Run After stick – Fuel what’s next.",
-        "description": "Great-tasting recovery built around how you actually train. Join the CJane Run waitlist.",
-        "h1": 'Fuel what’s <span class="accent">next.</span>',
-        "hero_lede": "The After stick: great-tasting recovery built around how you actually train. Mix it after practice to refuel, rebuild and rehydrate.",
-        "art_class": "art-render",
-        "hero_art": render("pack-after-hero"),
-        "products": [CJR_AFTER],
-        "products_title": "Meet the After stick.",
-        "products_lede": "Everything you need after training, in one stick you can mix anywhere.",
-        "question": USE_FREQ,
-        "faq": [("What kind of protein is in it?", PROTEIN_ANSWER), ("Is it right for teen athletes?", TEEN_ANSWER)],
-    },
-    {
-        "file": "hydrate/index.html", "path": "/hydrate/", "landing": "generic_pre", "brand": "everyday",
-        "title": "Everyday Hydration Mix",
-        "description": "An easy electrolyte drink mix for everyday hydration. Join the waitlist.",
-        "h1": 'Hydration, made <span class="accent">easy.</span>',
-        "hero_lede": "Everyday Hydration Mix is an electrolyte drink mix for busy days. Tear, pour, shake – anytime, anywhere.",
-        "art_class": "art-render",
-        "hero_art": render("pack-hydration-hero"),
-        "products": [EVERYDAY_HYDRATION],
-        "products_title": "Meet Everyday Hydration Mix.",
-        "products_lede": "Light enough for any bag, easy enough to mix anywhere.",
-        "question": USE_FREQ,
-        "faq": [("Will it have caffeine?", NO_CAFFEINE_ANSWER), ("What’s in it?", "Electrolytes – sodium, potassium and magnesium – with a little cane sugar, in a great-tasting mix. The draft facts panel is above, and we’ll share the full ingredient list before launch.")],
-    },
-    {
-        "file": "recover/index.html", "path": "/recover/", "landing": "generic_post", "brand": "everyday",
-        "title": "Everyday Recovery Mix",
-        "description": "An easy protein drink mix for recovery and everyday wellness. Join the waitlist.",
-        "h1": 'Recovery, made <span class="accent">easy.</span>',
-        "hero_lede": "Everyday Recovery Mix is a protein drink mix for recovery and everyday wellness. Mix it with water or blend it into a smoothie.",
-        "art_class": "art-render",
-        "hero_art": render("pack-recovery-hero"),
-        "products": [EVERYDAY_RECOVERY],
-        "products_title": "Meet Everyday Recovery Mix.",
-        "products_lede": "Protein you can mix anywhere, in one easy stick.",
-        "question": USE_FREQ,
-        "faq": [("What kind of protein is in it?", PROTEIN_ANSWER), ("What’s in it?", "20g of protein to support recovery, plus electrolytes, in a great-tasting mix. The draft facts panel is above, and we’ll share the full ingredient list before launch.")],
+        "hero_art": render("pack-everyday-pair-hero"),
+        "products": [EVERYDAY_HYDRATION, EVERYDAY_RECOVERY],
+        "products_title": "Two mixes. One easy routine.",
+        "products_lede": "Light sticks you mix with water – one for hydration, one for recovery. Both fit in any bag.",
+        "faq": [
+            ("Do they have caffeine?", "Hydration Mix is caffeine-free. Recovery Mix gets a small amount – about 30mg per stick – from its matcha."),
+            ("What kind of protein is in Recovery Mix?", PROTEIN_ANSWER),
+            ("What’s in them?", "Hydration Mix has electrolytes – sodium, potassium and magnesium – with a little cane sugar. Recovery Mix has 20g of protein plus electrolytes. The draft facts panels are above, and we’ll share full ingredient lists before launch."),
+        ],
     },
 ]
 
 
 def build(page):
     brand = BRANDS[page["brand"]]
-    # Ad pages link the logo to their own top, so ad traffic never crosses cells.
-    home_href = "/" if page["landing"] == "home" else "#top"
+    # The logo links to the page's own top, so ad traffic never crosses between the two brands.
+    home_href = "#top"
     body_class = f' class="{brand["body_class"]}"' if brand["body_class"] else ""
     html = (
         head(page, brand)
@@ -549,12 +452,12 @@ def build(page):
 PRIVACY = f"""<section class="legal">
   <div class="wrap">
     <h1>Privacy policy</h1>
-    <p class="updated">Last updated: September 28, 2026</p>
+    <p class="updated">Last updated: October 5, 2026</p>
     <p>CJane Run (“we,” “us”) is a brand in development. This policy explains what we collect on cjanerun.store – including pages for product concepts we test under other names, such as Everyday – and how we use it.</p>
 
     <h2>What we collect</h2>
     <ul>
-      <li><strong>What you give us:</strong> your email address and any answers you choose to share when you join a waitlist (such as whether you’re an athlete, parent or coach, your sport and how often you’d use a product).</li>
+      <li><strong>What you give us:</strong> your email address, when you join a waitlist.</li>
       <li><strong>Visit information:</strong> the page you signed up on and any campaign tags in the link you followed (for example, which ad you clicked).</li>
       <li><strong>Advertising measurement:</strong> we use the Meta Pixel to understand whether our ads on Facebook and Instagram lead to waitlist signups. The pixel uses cookies and similar technology to record page visits and signups.</li>
       <li><strong>Site analytics:</strong> we use Google Analytics to understand how visitors use our pages – for example, which pages they view, how long they stay and whether they join a waitlist. It uses cookies and collects information such as your approximate location, device and browser.</li>

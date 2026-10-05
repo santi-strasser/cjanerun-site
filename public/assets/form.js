@@ -6,7 +6,7 @@
     Accept: 'application/vnd.api+json',
     revision: '2026-07-15'
   };
-  var LANDING = document.body.getAttribute('data-landing') || 'home';
+  var LANDING = document.body.getAttribute('data-landing') || 'cjr';
   var UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
   var leadTracked = false;
 
@@ -51,27 +51,18 @@
     });
   }
 
-  // Answers go on the profile separately so a problem here never blocks the signup.
-  function saveAnswers(email, answers) {
+  // The page and ad tags go on the profile separately, so a problem here never blocks the signup.
+  function saveSource(email) {
+    var props = { signup_page: LANDING };
+    Object.keys(utms).forEach(function (k) { props[k] = utms[k]; });
     return post('profiles', {
-      data: { type: 'profile', attributes: { email: email, properties: answers } }
+      data: { type: 'profile', attributes: { email: email, properties: props } }
     }).catch(function () {});
   }
 
-  function answersFrom(form) {
-    var data = new FormData(form);
-    var out = { signup_page: LANDING };
-    ['role', 'first_pick', 'format_pref', 'sport'].forEach(function (k) {
-      var v = (data.get(k) || '').toString().trim();
-      if (v) out[k] = v;
-    });
-    Object.keys(utms).forEach(function (k) { out[k] = utms[k]; });
-    return out;
-  }
-
-  function setStatus(el, kind, html) {
+  function setStatus(el, kind, text) {
     el.className = 'form-status' + (kind ? ' ' + kind : '');
-    el.innerHTML = html;
+    el.textContent = text;
   }
 
   document.querySelectorAll('form.waitlist-form').forEach(function (form) {
@@ -91,7 +82,6 @@
       }
 
       var email = form.querySelector('input[type="email"]').value.trim();
-      var answers = answersFrom(form);
       var label = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Joining…';
@@ -100,8 +90,8 @@
       subscribe(email)
         .then(function (res) {
           if (!res.ok) throw new Error('Klaviyo ' + res.status);
-          saveAnswers(email, answers);
-          // One Lead per visit – the join form often follows a hero signup.
+          saveSource(email);
+          // One Lead per visit, even if someone uses both forms on the page.
           if (!leadTracked) {
             if (window.fbq) window.fbq('track', 'Lead', { content_name: LANDING });
             if (window.gtag) window.gtag('event', 'generate_lead', { signup_page: LANDING });
@@ -109,14 +99,7 @@
           leadTracked = true;
 
           form.reset();
-          if (form.hasAttribute('data-hero')) {
-            // Invite hero signups to answer the extra questions in the join form.
-            var joinEmail = document.querySelector('#join input[type="email"]');
-            if (joinEmail) joinEmail.value = email;
-            setStatus(status, 'ok', 'You’re on the list! <a href="#join">Help us build it – 2 quick questions ↓</a>');
-          } else {
-            setStatus(status, 'ok', 'You’re on the list – thank you for helping us build CJane Run.');
-          }
+          setStatus(status, 'ok', 'You’re on the list – we’ll be in touch.');
         })
         .catch(function () {
           setStatus(status, 'err', 'Something went wrong. Please try again.');
