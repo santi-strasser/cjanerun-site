@@ -3,3 +3,6 @@
 node_modules
 .dev.vars*
 .env*
+
+# full-size render scratch files
+tools/render3d/out/

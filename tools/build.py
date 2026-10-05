@@ -138,8 +138,8 @@ BRANDS = {
 # ---------------------------------------------------------------- products
 
 CJR_BEFORE = {
-    "cls": "m-before", "moment": "BEFORE", "name": "Performance stick", "img": "stick-before.svg",
-    "alt": "Pink CJane Run 'Before' stick pack",
+    "cls": "m-before", "moment": "BEFORE", "name": "Performance stick", "img": "pack-before-single.webp",
+    "alt": "Pink CJane Run Before stick pack, strawberry",
     "how": "Tear, pour into water and shake about 30 minutes before practice or a game.",
     "facts": [
         ("Built for", "Hydration, steady energy and focus"),
@@ -147,8 +147,8 @@ CJR_BEFORE = {
     ],
 }
 CJR_AFTER = {
-    "cls": "m-after", "moment": "AFTER", "name": "Recovery stick", "img": "stick-after.svg",
-    "alt": "Lavender CJane Run 'After' stick pack",
+    "cls": "m-after", "moment": "AFTER", "name": "Recovery stick", "img": "pack-after-single.webp",
+    "alt": "Lavender CJane Run After stick pack, matcha",
     "how": "Mix with water, or blend into a smoothie after training.",
     "facts": [
         ("Built for", "Protein to rebuild, carbs to refuel, electrolytes to rehydrate"),
@@ -156,8 +156,8 @@ CJR_AFTER = {
     ],
 }
 EVERYDAY_HYDRATION = {
-    "cls": "m-hydration", "moment": "HYDRATION", "name": "Everyday Hydration Mix", "img": "stick-everyday-hydration.svg",
-    "alt": "Light blue Everyday Hydration Mix stick pack",
+    "cls": "m-hydration", "moment": "HYDRATION", "name": "Everyday Hydration Mix", "img": "pack-hydration-single.webp",
+    "alt": "Light blue Everyday Hydration Mix stick pack, strawberry",
     "how": "Tear, pour into water and shake – anytime you need to rehydrate.",
     "facts": [
         ("Built for", "Electrolytes for fast, everyday hydration"),
@@ -165,8 +165,8 @@ EVERYDAY_HYDRATION = {
     ],
 }
 EVERYDAY_RECOVERY = {
-    "cls": "m-recovery", "moment": "RECOVERY", "name": "Everyday Recovery Mix", "img": "stick-everyday-recovery.svg",
-    "alt": "Sand-colored Everyday Recovery Mix stick pack",
+    "cls": "m-recovery", "moment": "RECOVERY", "name": "Everyday Recovery Mix", "img": "pack-recovery-single.webp",
+    "alt": "Sand-colored Everyday Recovery Mix stick pack, matcha",
     "how": "Mix with water, or blend into a smoothie or your morning coffee.",
     "facts": [
         ("Built for", "Protein to support recovery and everyday wellness"),
@@ -415,13 +415,9 @@ def footer(brand):
 # ---------------------------------------------------------------- pages
 
 
-def img(name, cls):
-    return f'<img class="{cls}" src="/assets/images/{name}" alt="">'
-
-
-def fan(name):
-    """Three of the same stick, fanned – hero art for single-product pages."""
-    return img(name, "s1") + img(name, "s2") + img(name, "s3")
+def render(name):
+    """Hero art: one 3D-rendered group shot (carton + sticks) from tools/make_renders.py."""
+    return f'<img src="/assets/images/{name}.webp" alt="" fetchpriority="high">'
 
 
 CAFFEINE_ANSWER = "We’re testing options, including a caffeine-free version. Tell us what you’d prefer when you join – it will shape what we make."
@@ -435,8 +431,8 @@ PAGES = [
         "description": "Great-tasting sports nutrition built around how you actually train. CJane Run is coming soon – join the waitlist.",
         "h1": 'Fuel what’s <span class="accent">next.</span>',
         "hero_lede": "Great-tasting nutrition built around how you actually train. Tear, pour, shake – before practice and after it.",
-        "art_class": "art-pair",
-        "hero_art": img("stick-before.svg", "s1") + img("stick-after.svg", "s2"),
+        "art_class": "art-render",
+        "hero_art": render("pack-cjr-pair-hero"),
         "products": [CJR_BEFORE, CJR_AFTER],
         "products_title": "Two moments. One routine.",
         "products_lede": "Light sticks you mix with water – one before practice, one after. Both fit in your gym bag.",
@@ -449,8 +445,8 @@ PAGES = [
         "description": "Great-tasting pre-practice fuel built around how you actually train. Join the CJane Run waitlist.",
         "h1": 'Fuel what’s <span class="accent">next.</span>',
         "hero_lede": "The Before stick: great-tasting pre-practice fuel built around how you actually train. Tear, pour, shake – 30 minutes before you play.",
-        "art_class": "art-single",
-        "hero_art": fan("stick-before.svg"),
+        "art_class": "art-render",
+        "hero_art": render("pack-before-hero"),
         "products": [CJR_BEFORE],
         "products_title": "Meet the Before stick.",
         "products_lede": "Light enough for your gym bag, easy enough to mix on the way to practice.",
@@ -463,8 +459,8 @@ PAGES = [
         "description": "Great-tasting recovery built around how you actually train. Join the CJane Run waitlist.",
         "h1": 'Fuel what’s <span class="accent">next.</span>',
         "hero_lede": "The After stick: great-tasting recovery built around how you actually train. Mix it after practice to refuel, rebuild and rehydrate.",
-        "art_class": "art-single",
-        "hero_art": fan("stick-after.svg"),
+        "art_class": "art-render",
+        "hero_art": render("pack-after-hero"),
         "products": [CJR_AFTER],
         "products_title": "Meet the After stick.",
         "products_lede": "Everything you need after training, in one stick you can mix anywhere.",
@@ -477,8 +473,8 @@ PAGES = [
         "description": "An easy electrolyte drink mix for everyday hydration. Join the waitlist.",
         "h1": 'Hydration, made <span class="accent">easy.</span>',
         "hero_lede": "Everyday Hydration Mix is an electrolyte drink mix for busy days. Tear, pour, shake – anytime, anywhere.",
-        "art_class": "art-single",
-        "hero_art": fan("stick-everyday-hydration.svg"),
+        "art_class": "art-render",
+        "hero_art": render("pack-hydration-hero"),
         "products": [EVERYDAY_HYDRATION],
         "products_title": "Meet Everyday Hydration Mix.",
         "products_lede": "Light enough for any bag, easy enough to mix anywhere.",
@@ -491,8 +487,8 @@ PAGES = [
         "description": "An easy protein drink mix for recovery and everyday wellness. Join the waitlist.",
         "h1": 'Recovery, made <span class="accent">easy.</span>',
         "hero_lede": "Everyday Recovery Mix is a protein drink mix for recovery and everyday wellness. Mix it with water or blend it into a smoothie.",
-        "art_class": "art-single",
-        "hero_art": fan("stick-everyday-recovery.svg"),
+        "art_class": "art-render",
+        "hero_art": render("pack-recovery-hero"),
         "products": [EVERYDAY_RECOVERY],
         "products_title": "Meet Everyday Recovery Mix.",
         "products_lede": "Protein you can mix anywhere, in one easy stick.",

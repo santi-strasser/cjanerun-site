@@ -62,8 +62,12 @@ Page copy lives in `tools/build.py`. After editing, rebuild:
 python tools/build.py
 ```
 
-Stick illustrations: `tools/make_art.py`. Favicons and share image:
-`tools/make_images.py` (uses headless Edge).
+Product images are 3D renders: `python tools/make_renders.py` draws the stick
+packs and cartons with three.js (`tools/render3d/index.html` – label designs,
+shapes and camera shots all live there) in headless Edge and saves WebP files
+to `public/assets/images/`. Add `--export DIR` for full-size PNGs and flat
+label art. Favicons and share images: `tools/make_images.py` (run it after
+the renders – the share images use them).
 
 ## Deploying (Cloudflare Workers static assets)
 

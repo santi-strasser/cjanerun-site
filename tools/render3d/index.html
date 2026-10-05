@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CJane Run – pack renders</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Montserrat:wght@600;700;800&display=block" rel="stylesheet">
+<style>body{margin:0;background:#888}canvas{display:block}</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<script type="module">
+// Renders the stick-pack and carton product shots with three.js and POSTs
+// each PNG to the local server started by tools/make_renders.py.
+// Open with ?preview=NAME to look at one shot in a normal browser instead.
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const NAVY = '#1B2030';
+const PAPER = '#F6F5F1';
+const EVERYDAY_INK = '#12414D';
+const STICK = { w: 4.6, h: 15.2, t: 1.15, crimp: 1.25 };   // centimetres
+const BOX = { w: 10.4, h: 16.4, d: 5.6 };
+
+const PRODUCTS = {
+  before: {
+    brand: 'cjr', body: '#E07A93', dark: '#C55F79', ink: '#FFFFFF', accent: NAVY,
+    word: 'BEFORE', sub: 'PERFORMANCE STICK', flavor: 'STRAWBERRY',
+    claims: ['ENERGY', 'FOCUS', 'HYDRATION'],
+  },
+  after: {
+    brand: 'cjr', body: '#B3A9D6', dark: '#9A8FC4', ink: NAVY, accent: NAVY,
+    word: 'AFTER', sub: 'RECOVERY STICK', flavor: 'MATCHA',
+    claims: ['REFUEL', 'REBUILD', 'REHYDRATE'],
+  },
+  hydration: {
+    brand: 'everyday', body: '#9AD3E0', dark: '#7DBFCF', ink: EVERYDAY_INK, accent: EVERYDAY_INK,
+    word: 'HYDRATION', sub: 'ELECTROLYTE DRINK MIX', flavor: 'STRAWBERRY', icon: 'drop',
+  },
+  recovery: {
+    brand: 'everyday', body: '#E9CFA8', dark: '#D6B684', ink: EVERYDAY_INK, accent: EVERYDAY_INK,
+    word: 'RECOVERY', sub: 'PROTEIN DRINK MIX', flavor: 'MATCHA', icon: 'leaf',
+  },
+};
+
+// ------------------------------------------------------------------ helpers
+
+const runnerSvg = await (await fetch('/public/assets/images/runner.svg')).text();
+const RUNNER = new Path2D(/d="(M[^"]+)"/.exec(runnerSvg)[1]);
+
+await Promise.all([
+  '600 40px Montserrat', '700 40px Montserrat', '800 40px Montserrat',
+  '500 40px Inter', '700 40px Inter',
+].map(f => document.fonts.load(f)));
+
+function rng(seed) {             // small deterministic PRNG
+  let s = seed >>> 0;
+  return () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) ^ Math.imul(s ^ (s >>> 13), 3266489909), (s ^= s >>> 16) >>> 0) / 4294967296);
+}
+
+function canvas(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return [c, c.getContext('2d')];
+}
+
+function text(ctx, str, x, y, font, color, spacing = 0, align = 'center') {
+  ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align;
+  ctx.textBaseline = 'middle'; ctx.letterSpacing = spacing + 'px';
+  // letterSpacing adds a trailing gap – nudge so the visible text stays centred
+  ctx.fillText(str, x + (align === 'center' ? spacing / 2 : 0), y);
+}
+
+function badge(ctx, cx, cy, r, withText) {
+  ctx.save();
+  ctx.translate(cx - r * 100 / 96, cy - r * 100 / 96);
+  ctx.scale(r / 96, r / 96);
+  ctx.fillStyle = NAVY; ctx.beginPath(); ctx.arc(100, 100, 96, 0, 7); ctx.fill();
+  ctx.fillStyle = '#E3A2AB'; ctx.fill(RUNNER, 'evenodd');
+  ctx.strokeStyle = '#E3A2AB'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(24, 108.5); ctx.lineTo(54, 108.5); ctx.moveTo(146, 108.5); ctx.lineTo(176, 108.5); ctx.stroke();
+  if (withText) {
+    const arc = (str, radius, top) => {
+      ctx.font = '600 25px Montserrat'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.letterSpacing = '0px';
+      const step = 0.34 * 66 / radius * (top ? 1 : 0.92), start = -step * (str.length - 1) / 2;
+      [...str].forEach((ch, i) => {
+        const a = start + i * step;
+        ctx.save(); ctx.translate(100, 100);
+        if (top) { ctx.rotate(a); ctx.translate(0, -radius); }
+        else { ctx.rotate(-a); ctx.translate(0, radius); }
+        ctx.fillText(ch, 0, top ? 0 : 18); ctx.restore();
+      });
+    };
+    arc('CJANE', 66, true); arc('RUN', 66, false);
+  }
+  ctx.restore();
+}
+
+function iconCircle(ctx, cx, cy, r, kind, ink) {
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+  ctx.save(); ctx.translate(cx - r * 0.55, cy - r * 0.55); ctx.scale(r * 1.1 / 24, r * 1.1 / 24);
+  ctx.strokeStyle = ink; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.stroke(new Path2D(kind === 'drop'
+    ? 'M12 3c3.5 4.6 6 8 6 11a6 6 0 0 1-12 0c0-3 2.5-6.4 6-11z'
+    : 'M5 19c0-8 5-13 14-14 0 9-5 14-13 14zM5 19l7-7'));
+  ctx.restore();
+}
+
+// ------------------------------------------------------------------ stick label
+
+const LW = 1024, LH = Math.round(1024 * STICK.h / STICK.w);
+const CRIMP_PX = Math.round(LH * STICK.crimp / STICK.h);
+
+function stickLabel(p) {
+  const [c, ctx] = canvas(LW, LH);
+  ctx.fillStyle = p.body; ctx.fillRect(0, 0, LW, LH);
+  // crimped seals print a touch darker
+  ctx.fillStyle = p.dark;
+  ctx.fillRect(0, 0, LW, CRIMP_PX); ctx.fillRect(0, LH - CRIMP_PX, LW, CRIMP_PX);
+  // tear notches
+  ctx.fillStyle = p.dark;
+  for (const s of [0, 1]) {
+    const x = s ? LW : 0, d = s ? -1 : 1, y = CRIMP_PX + 70;
+    ctx.beginPath(); ctx.moveTo(x, y - 34); ctx.lineTo(x + d * 46, y); ctx.lineTo(x, y + 34); ctx.fill();
+  }
+  const mid = LW / 2;
+  if (p.brand === 'cjr') {
+    text(ctx, 'CJANE RUN', mid, CRIMP_PX + 250, '700 84px Montserrat', p.ink, 26);
+    ctx.fillStyle = p.ink; ctx.globalAlpha = .55; ctx.fillRect(mid - 150, CRIMP_PX + 330, 300, 5); ctx.globalAlpha = 1;
+    ctx.save(); ctx.translate(mid + 20, LH * 0.405); ctx.rotate(-Math.PI / 2);
+    text(ctx, p.word, 0, 0, `800 ${p.word.length > 5 ? 290 : 330}px Montserrat`, p.ink, 26);
+    ctx.restore();
+    badge(ctx, mid, LH * 0.715, 140, false);
+    text(ctx, p.sub, mid, LH * 0.795, '700 52px Montserrat', p.ink, 9);
+    text(ctx, p.flavor, mid, LH * 0.835, '600 60px Montserrat', p.ink, 14);
+    ctx.globalAlpha = .9;
+    text(ctx, p.claims.join('  ·  '), mid, LH * 0.878, '600 34px Montserrat', p.ink, 5);
+    ctx.globalAlpha = 1;
+  } else {
+    text(ctx, 'everyday', mid, CRIMP_PX + 260, '700 168px Inter', p.ink, -4);
+    ctx.save(); ctx.translate(mid + 14, LH * 0.415); ctx.rotate(-Math.PI / 2);
+    text(ctx, p.word, 0, 0, '700 205px Inter', p.ink, 18);
+    ctx.restore();
+    iconCircle(ctx, mid, LH * 0.715, 130, p.icon, p.ink);
+    text(ctx, p.sub, mid, LH * 0.795, '700 46px Inter', p.ink, 6);
+    text(ctx, p.flavor, mid, LH * 0.835, '500 58px Inter', p.ink, 12);
+    ctx.globalAlpha = .8;
+    text(ctx, 'SINGLE SERVE  ·  MIX WITH WATER', mid, LH * 0.878, '500 32px Inter', p.ink, 4);
+    ctx.globalAlpha = 1;
+  }
+  return c;
+}
+
+function stickBack(p) {
+  const [c, ctx] = canvas(LW, LH);
+  ctx.fillStyle = p.body; ctx.fillRect(0, 0, LW, LH);
+  ctx.fillStyle = p.dark;
+  ctx.fillRect(0, 0, LW, CRIMP_PX); ctx.fillRect(0, LH - CRIMP_PX, LW, CRIMP_PX);
+  ctx.fillRect(LW / 2 - 60, CRIMP_PX, 120, LH - 2 * CRIMP_PX);   // fin seal
+  return c;
+}
+
+// Height map: ridged crimps, fine film grain and a few soft creases.
+function stickBump(seed, back) {
+  const [c, ctx] = canvas(LW / 2, LH / 2);
+  const w = c.width, h = c.height, cp = CRIMP_PX / 2, r = rng(seed);
+  ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, w, h);
+  const img = ctx.getImageData(0, 0, w, h), d = img.data;
+  for (let i = 0; i < d.length; i += 4) { const n = 128 + (r() - .5) * 10; d[i] = d[i + 1] = d[i + 2] = n; }
+  ctx.putImageData(img, 0, 0);
+  ctx.filter = 'blur(14px)'; ctx.lineCap = 'round';
+  for (let i = 0; i < 26; i++) {          // creases fanning out of the seals
+    const top = r() < .5, x = r() * w, y0 = top ? cp : h - cp, len = 90 + r() * 260, dir = top ? 1 : -1;
+    ctx.strokeStyle = r() < .5 ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.45)'; ctx.lineWidth = 10 + r() * 16;
+    ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x + (r() - .5) * 150, y0 + dir * len); ctx.stroke();
+  }
+  ctx.filter = 'none';
+  for (const y0 of [0, h - cp]) {          // seal ridges
+    for (let y = y0 + 3; y < y0 + cp - 3; y += 9) {
+      ctx.fillStyle = '#e0e0e0'; ctx.fillRect(0, y, w, 4);
+      ctx.fillStyle = '#383838'; ctx.fillRect(0, y + 4, w, 5);
+    }
+  }
+  if (back) { ctx.fillStyle = '#d0d0d0'; ctx.fillRect(w / 2 - 30, cp, 60, h - 2 * cp); }
+  return c;
+}
+
+function tex(c, color) {
+  const t = new THREE.CanvasTexture(c);
+  if (color) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 16; t.generateMipmaps = true;
+  return t;
+}
+
+// ------------------------------------------------------------------ stick mesh
+
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+function stickGeometry(seed, side) {      // side: +1 front, -1 back
+  const { w: W, h: H, t: T, crimp: C } = STICK;
+  const nu = 56, nv = 220, r = rng(seed);
+  const k = [r() * 6, r() * 6, r() * 6, 0.8 + r() * 0.5];
+  const pos = [], uv = [], idx = [];
+  for (let j = 0; j <= nv; j++) {
+    const v = j / nv, y = (v - 0.5) * H;
+    const d = Math.min(v, 1 - v) * H;
+    const fill = smooth(C, C + 3.0, d);
+    const settle = 0.72 + 0.42 * smooth(0.75, 0.1, v);          // powder settles to the bottom
+    const pinch = 1 - 0.075 * fill * settle;                     // film pulls in where it bulges
+    for (let i = 0; i <= nu; i++) {
+      const u = i / nu;
+      const prof = Math.pow(Math.sin(Math.PI * u), 0.5);
+      const lump = 1 + 0.07 * Math.sin(u * 5 + k[0]) * Math.sin(v * 9 + k[1]) + 0.05 * Math.sin(v * 21 * k[3] + k[2]);
+      const t = T * fill * settle * prof * lump;
+      const wave = 0.07 * Math.sin(u * Math.PI * 2.2 + k[0]) * (1 - fill);   // seals are never dead flat
+      pos.push((u - 0.5) * W * pinch, y, side * t / 2 + wave + side * 0.004);
+      uv.push(side > 0 ? u : 1 - u, v);
+    }
+  }
+  for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) {
+    const a = j * (nu + 1) + i, b = a + 1, c = a + nu + 1, e = c + 1;
+    side > 0 ? idx.push(a, b, e, a, e, c) : idx.push(a, e, b, a, c, e);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
+const cache = {};
+function stick(key, seed) {
+  const p = PRODUCTS[key];
+  cache[key] ??= { front: tex(stickLabel(p), true), back: tex(stickBack(p), true) };
+  const film = (map, bump) => new THREE.MeshPhysicalMaterial({
+    map, bumpMap: bump, bumpScale: 2.2, roughness: 0.46, metalness: 0.0,
+    clearcoat: 0.35, clearcoatRoughness: 0.42, envMapIntensity: 1.0,
+  });
+  const g = new THREE.Group();
+  const f = new THREE.Mesh(stickGeometry(seed, 1), film(cache[key].front, tex(stickBump(seed, false))));
+  const b = new THREE.Mesh(stickGeometry(seed, -1), film(cache[key].back, tex(stickBump(seed + 7, true))));
+  for (const m of [f, b]) { m.castShadow = true; m.receiveShadow = true; g.add(m); }
+  return g;
+}
+
+// ------------------------------------------------------------------ carton
+
+function boxFace(p, kind) {
+  const dims = { front: [BOX.w, BOX.h], side: [BOX.d, BOX.h], top: [BOX.w, BOX.d] }[kind];
+  const S = 150, [c, ctx] = canvas(Math.round(dims[0] * S), Math.round(dims[1] * S));
+  const w = c.width, h = c.height, cjr = p.brand === 'cjr', face = cjr ? 'Montserrat' : 'Inter';
+  ctx.fillStyle = p.body; ctx.fillRect(0, 0, w, h);
+  if (kind === 'front') {
+    ctx.fillStyle = cjr ? PAPER : '#fff';
+    ctx.fillRect(0, h * 0.8, w, h * 0.2);
+    const foot = cjr ? NAVY : p.ink, L = w * 0.085;
+    if (cjr) {
+      badge(ctx, L + 170, h * 0.135, 170, true);
+      text(ctx, p.word, L - 8, h * 0.37, `800 ${p.word.length > 5 ? 215 : 250}px Montserrat`, p.ink, 10, 'left');
+      text(ctx, p.sub + 'S', L, h * 0.468, '700 58px Montserrat', p.ink, 10, 'left');
+      ctx.fillStyle = p.ink; ctx.globalAlpha = .5; ctx.fillRect(L, h * 0.52, 300, 6); ctx.globalAlpha = 1;
+      text(ctx, p.flavor, L, h * 0.578, '600 82px Montserrat', p.ink, 16, 'left');
+      text(ctx, 'DRINK MIX', L, h * 0.628, '600 44px Montserrat', p.ink, 12, 'left');
+      p.claims.forEach((c, i) => text(ctx, c, L, h * (0.842 + i * 0.047), '700 50px Montserrat', i ? NAVY : '#C9627C', 10, 'left'));
+    } else {
+      text(ctx, 'everyday', L - 6, h * 0.12, '700 210px Inter', p.ink, -6, 'left');
+      iconCircle(ctx, L + 150, h * 0.27, 150, p.icon, p.ink);
+      text(ctx, p.word[0] + p.word.slice(1).toLowerCase(), L - 6, h * 0.43, '700 170px Inter', p.ink, -3, 'left');
+      text(ctx, 'Mix', L - 4, h * 0.525, '700 170px Inter', p.ink, -3, 'left');
+      text(ctx, p.flavor, L, h * 0.628, '500 78px Inter', p.ink, 16, 'left');
+      p.sub.replace(' DRINK MIX', '|DRINK MIX').split('|').concat('STICK PACKS').forEach((c, i) =>
+        text(ctx, c, L, h * (0.842 + i * 0.047), `${i < 2 ? 700 : 500} 48px Inter`, foot, 8, 'left'));
+    }
+  } else if (kind === 'side') {
+    ctx.fillStyle = cjr ? PAPER : '#fff'; ctx.fillRect(0, h * 0.8, w, h * 0.2);
+    ctx.save(); ctx.translate(w / 2, h * 0.4); ctx.rotate(-Math.PI / 2);
+    text(ctx, cjr ? 'CJANE RUN' : 'everyday', 0, 0, cjr ? `700 150px ${face}` : `700 230px ${face}`, p.ink, cjr ? 40 : -6);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = 'rgba(0,0,0,.10)'; ctx.fillRect(0, h * 0.5 - 3, w, 6);     // lid seam
+    text(ctx, cjr ? 'CJANE RUN' : 'everyday', w / 2, h * 0.27, cjr ? `700 96px ${face}` : `700 150px ${face}`, p.ink, cjr ? 26 : -4);
+  }
+  return c;
+}
+
+function carton(key) {
+  const p = PRODUCTS[key];
+  const paper = c => new THREE.MeshPhysicalMaterial({ map: tex(c, true), roughness: 0.6, clearcoat: 0.18, clearcoatRoughness: 0.5 });
+  const plain = new THREE.MeshPhysicalMaterial({ color: p.body, roughness: 0.6 });
+  // BoxGeometry face order: +x, -x, +y, -y, +z, -z
+  const mats = [paper(boxFace(p, 'side')), paper(boxFace(p, 'side')), paper(boxFace(p, 'top')), plain, paper(boxFace(p, 'front')), plain];
+  const m = new THREE.Mesh(new RoundedBoxGeometry(BOX.w, BOX.h, BOX.d, 4, 0.09), mats);
+  m.castShadow = true; m.receiveShadow = true; m.position.y = BOX.h / 2;
+  return m;
+}
+
+// ------------------------------------------------------------------ scenes
+
+function leaning(key, seed, x, lean, roll, againstZ) {
+  const s = stick(key, seed); s.position.y = STICK.h / 2;
+  const rollG = new THREE.Group(); rollG.add(s); rollG.rotation.z = roll;
+  const pivot = new THREE.Group(); pivot.add(rollG); pivot.rotation.x = -lean;
+  pivot.position.set(x, 0.02, againstZ + STICK.t * 0.5 + STICK.h * Math.sin(lean));
+  return pivot;
+}
+
+function lying(key, seed, x, z, yaw) {
+  const s = stick(key, seed); s.rotation.x = -Math.PI / 2;
+  const g = new THREE.Group(); g.add(s); g.rotation.y = yaw; g.position.set(x, STICK.t * 0.42, z);
+  return g;
+}
+
+function boxGroup(key, seed, x, yaw) {
+  const g = new THREE.Group();
+  g.add(carton(key));
+  g.add(leaning(key, seed, BOX.w / 2 - 0.9, 0.21, -0.07, BOX.d / 2));
+  g.position.x = x; g.rotation.y = yaw;
+  return g;
+}
+
+const SHOTS = {};
+for (const key of Object.keys(PRODUCTS)) {
+  SHOTS[`pack-${key}-hero`] = {
+    size: [1500, 1300], cam: [1, 19, 58], look: [1.5, 6.4, 5], fov: 27, ground: true,
+    build(scene) {
+      scene.add(boxGroup(key, 11, -5.2, 0.34));
+      scene.add(lying(key, 29, -3.6, 13.2, 1.18 - Math.PI));
+      scene.add(lying(key, 41, 9.6, 9.6, 0.42));
+    },
+  };
+  SHOTS[`pack-${key}-single`] = {
+    size: [700, 1500], cam: [0, 0, 46], look: [0, 0, 0], fov: 22, ground: false,
+    build(scene) {
+      const s = stick(key, 11); s.rotation.set(-0.06, -0.42, 0.05); scene.add(s);
+    },
+  };
+}
+SHOTS['pack-cjr-pair-hero'] = {
+  size: [1700, 1300], cam: [0, 20, 64], look: [0, 6.4, 5], fov: 27, ground: true,
+  build(scene) {
+    scene.add(boxGroup('before', 11, -9.4, 0.3));
+    scene.add(boxGroup('after', 17, 5.2, -0.16));
+    scene.add(lying('before', 29, -6.5, 14.2, 1.15 - Math.PI));
+    scene.add(lying('after', 41, 6.2, 15, 0.72));
+  },
+};
+
+SHOTS['pack-everyday-pair-hero'] = {
+  ...SHOTS['pack-cjr-pair-hero'],
+  build(scene) {
+    scene.add(boxGroup('hydration', 11, -9.4, 0.3));
+    scene.add(boxGroup('recovery', 17, 5.2, -0.16));
+    scene.add(lying('hydration', 29, -6.5, 14.2, 1.15 - Math.PI));
+    scene.add(lying('recovery', 41, 6.2, 15, 0.72));
+  },
+};
+
+// ------------------------------------------------------------------ render
+
+const SS = 2;   // supersample, the server downsizes
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+renderer.setClearColor(0x000000, 0);
+renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.VSMShadowMap;
+document.body.appendChild(renderer.domElement);
+const env = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.03).texture;
+
+function render(name) {
+  const shot = SHOTS[name], [w, h] = shot.size;
+  renderer.setPixelRatio(SS); renderer.setSize(w, h, false);
+  renderer.domElement.style.width = w / 2 + 'px';
+  const scene = new THREE.Scene();
+  scene.environment = env; scene.environmentIntensity = 0.5;
+  const key = new THREE.DirectionalLight(0xfff4ea, 2.1);
+  key.position.set(-16, 34, 26); key.castShadow = true;
+  key.shadow.mapSize.set(4096, 4096); key.shadow.radius = 9; key.shadow.blurSamples = 20; key.shadow.bias = -0.0006;
+  Object.assign(key.shadow.camera, { left: -30, right: 30, top: 32, bottom: -22, near: 1, far: 120 });
+  scene.add(key);
+  const rim = new THREE.DirectionalLight(0xdfe8ff, 0.9); rim.position.set(24, 14, -18); scene.add(rim);
+  if (shot.ground) {
+    const g = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.ShadowMaterial({ opacity: 0.42 }));
+    g.rotation.x = -Math.PI / 2; g.receiveShadow = true; scene.add(g);
+  }
+  shot.build(scene);
+  const cam = new THREE.PerspectiveCamera(shot.fov, w / h, 1, 300);
+  cam.position.set(...shot.cam); cam.lookAt(...shot.look);
+  renderer.render(scene, cam);
+}
+
+const preview = new URLSearchParams(location.search).get('preview');
+if (preview) {
+  render(preview);
+} else {
+  for (const name of Object.keys(SHOTS)) {
+    render(name);
+    const blob = await new Promise(r => renderer.domElement.toBlob(r, 'image/png'));
+    await fetch('/save?name=' + name, { method: 'POST', body: blob });
+  }
+  for (const [key, p] of Object.entries(PRODUCTS)) {
+    for (const [kind, c] of [['stick', stickLabel(p)], ['box', boxFace(p, 'front')]]) {
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+      await fetch(`/save?name=label-${key}-${kind}`, { method: 'POST', body: blob });
+    }
+  }
+  await fetch('/done', { method: 'POST' });
+}
+document.title = 'done';
+</script>
+</body>
+</html>
