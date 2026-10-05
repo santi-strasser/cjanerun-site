@@ -213,6 +213,41 @@ legend .optional { font-weight: 400; color: var(--muted); }
 .product.feature .how { font-size: 18px; }
 .product.feature dl { font-size: 16px; gap: 14px; }
 
+/* ---------- What's inside (facts panel + headline ingredients) ---------- */
+
+.inside { display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: start; margin-top: 22px; padding: 44px; border-radius: var(--radius); background: var(--paper); }
+.inside h3 { font-size: 30px; }
+.inside .how { margin: 8px 0 0; font-size: 18px; color: var(--muted); }
+.inside-group { margin-top: 26px; }
+.inside-group h4 { margin: 0 0 6px; font-family: var(--display); font-weight: 700; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--pink); }
+.inside-group ul { list-style: none; margin: 0; padding: 0; }
+.inside-group li { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.inside-group li span:last-child { font-weight: 700; white-space: nowrap; }
+.inside-note { margin: 22px 0 0; font-size: 14px; color: var(--muted); }
+.inside-panel { background: #fff; padding: 14px; border-radius: 14px; box-shadow: 0 1px 2px rgba(27, 32, 48, .08); }
+
+/* Facts panel: fixed black-and-white label styling, the same for every brand. */
+/* nf:start */
+.nf { width: 290px; box-sizing: border-box; border: 1.5px solid #000; padding: 4px 6px 5px; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 12.5px; line-height: 1.25; letter-spacing: 0; text-align: left; }
+.nf b, .nf-b { font-weight: 700; }
+.nf-title { font: 900 37px/1.02 'Arial Black', Arial, Helvetica, sans-serif; letter-spacing: -.6px; margin-bottom: 1px; }
+.nf-supp .nf-title { font-size: 33.5px; }
+.nf-serv { font-size: 13px; }
+.nf-sz { display: flex; justify-content: space-between; font-size: 14px; }
+.nf-small { font-size: 10.5px; }
+.nf-bar { background: #000; margin: 2px 0; }
+.nf-thick { height: 9px; }
+.nf-mid { height: 4.5px; }
+.nf-cal { display: flex; justify-content: space-between; align-items: flex-end; font: 900 27px/1 'Arial Black', Arial, Helvetica, sans-serif; }
+.nf-cal span:last-child { font-size: 37px; }
+.nf-r { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid #000; padding: 1.6px 0; }
+.nf-r.nf-right { justify-content: flex-end; border-top: 0; }
+.nf-r.nf-head, .nf-bar + .nf-r { border-top: 0; }
+.nf-i1 { padding-left: 14px; }
+.nf-i2 { padding-left: 28px; }
+.nf-foot { font-size: 9.3px; line-height: 1.2; padding-top: 3px; }
+/* nf:end */
+
 .concept-note { margin: 28px 0 0; font-size: 14px; color: var(--muted); }
 
 /* ---------- Join ---------- */
@@ -293,6 +328,9 @@ legend .optional { font-weight: 400; color: var(--muted); }
   .product.feature .product-art img { height: 100%; }
   .product.feature .product-body { padding: 26px 28px 30px; }
   .product.feature h3 { font-size: 24px; }
+  .inside { grid-template-columns: 1fr; gap: 30px; padding: 26px 22px 28px; }
+  .inside h3 { font-size: 24px; }
+  .inside-panel { justify-self: center; padding: 10px; }
   .join .wrap { grid-template-columns: 1fr; gap: 28px; }
   .join-card { padding: 24px; }
   .product-art { height: 220px; }

@@ -16,6 +16,8 @@ Pages:
 """
 from pathlib import Path
 
+import nutrition
+
 ROOT = Path(__file__).resolve().parent.parent
 PUBLIC = ROOT / "public"
 SITE = "https://cjanerun.store"
@@ -138,7 +140,7 @@ BRANDS = {
 # ---------------------------------------------------------------- products
 
 CJR_BEFORE = {
-    "cls": "m-before", "moment": "BEFORE", "name": "Performance stick", "img": "pack-before-single.webp",
+    "cls": "m-before", "moment": "BEFORE", "name": "Performance stick", "img": "pack-before-single.webp", "panel": "cjr-before",
     "alt": "Pink CJane Run Before stick pack, strawberry",
     "how": "Tear, pour into water and shake about 30 minutes before practice or a game.",
     "facts": [
@@ -147,7 +149,7 @@ CJR_BEFORE = {
     ],
 }
 CJR_AFTER = {
-    "cls": "m-after", "moment": "AFTER", "name": "Recovery stick", "img": "pack-after-single.webp",
+    "cls": "m-after", "moment": "AFTER", "name": "Recovery stick", "img": "pack-after-single.webp", "panel": "cjr-after",
     "alt": "Lavender CJane Run After stick pack, matcha",
     "how": "Mix with water, or blend into a smoothie after training.",
     "facts": [
@@ -156,7 +158,7 @@ CJR_AFTER = {
     ],
 }
 EVERYDAY_HYDRATION = {
-    "cls": "m-hydration", "moment": "HYDRATION", "name": "Everyday Hydration Mix", "img": "pack-hydration-single.webp",
+    "cls": "m-hydration", "moment": "HYDRATION", "name": "Everyday Hydration Mix", "img": "pack-hydration-single.webp", "panel": "everyday-hydration",
     "alt": "Light blue Everyday Hydration Mix stick pack, strawberry",
     "how": "Tear, pour into water and shake – anytime you need to rehydrate.",
     "facts": [
@@ -165,7 +167,7 @@ EVERYDAY_HYDRATION = {
     ],
 }
 EVERYDAY_RECOVERY = {
-    "cls": "m-recovery", "moment": "RECOVERY", "name": "Everyday Recovery Mix", "img": "pack-recovery-single.webp",
+    "cls": "m-recovery", "moment": "RECOVERY", "name": "Everyday Recovery Mix", "img": "pack-recovery-single.webp", "panel": "everyday-recovery",
     "alt": "Sand-colored Everyday Recovery Mix stick pack, matcha",
     "how": "Mix with water, or blend into a smoothie or your morning coffee.",
     "facts": [
@@ -319,10 +321,30 @@ def product_feature(p):
       </article>"""
 
 
+def inside(p):
+    """Facts panel plus the headline ingredients, grouped by what they're for."""
+    groups = "".join(
+        f'<div class="inside-group"><h4>{title}</h4><ul>'
+        + "".join(f"<li><span>{name}</span><span>{amount}</span></li>" for name, amount in rows)
+        + "</ul></div>"
+        for title, rows in nutrition.INSIDE[p["panel"]])
+    return f"""<div class="inside">
+      <div class="inside-copy">
+        <h3>What’s inside</h3>
+        <p class="how">One stick, by the numbers.</p>
+        {groups}
+        <p class="inside-note">Draft formula. These values are estimates and may change before launch.</p>
+      </div>
+      <div class="inside-panel">
+        {nutrition.PANELS[p["panel"]]()}
+      </div>
+    </div>"""
+
+
 def products(page):
     items = page["products"]
     if len(items) == 1:
-        body = product_feature(items[0])
+        body = product_feature(items[0]) + inside(items[0])
     else:
         body = f'<div class="product-grid two">{"".join(product_card(p) for p in items)}</div>'
     return f"""<section class="section products">
@@ -420,9 +442,10 @@ def render(name):
     return f'<img src="/assets/images/{name}.webp" alt="" fetchpriority="high">'
 
 
-CAFFEINE_ANSWER = "We’re testing options, including a caffeine-free version. Tell us what you’d prefer when you join – it will shape what we make."
+CAFFEINE_ANSWER = "Our current draft has about 90mg per stick – roughly a cup of coffee. We’re also testing a caffeine-free version. Tell us what you’d prefer when you join – it will shape what we make."
+NO_CAFFEINE_ANSWER = "No. The current draft formula is caffeine-free."
 TEEN_ANSWER = "We’re developing every product with age-appropriate expert guidance, and we’ll share full ingredient lists before launch. Food, water and rest come first – we’re here to make fueling easier, not replace it."
-PROTEIN_ANSWER = "We’re developing it with a complete protein and will share the full ingredient list before launch. Tell us what you’d prefer when you join."
+PROTEIN_ANSWER = "A complete, non-dairy protein – 20g per stick. Our current draft uses a pea and rice blend, and we’ll share the full ingredient list before launch."
 
 PAGES = [
     {
@@ -479,7 +502,7 @@ PAGES = [
         "products_title": "Meet Everyday Hydration Mix.",
         "products_lede": "Light enough for any bag, easy enough to mix anywhere.",
         "question": USE_FREQ,
-        "faq": [("Will it have caffeine?", CAFFEINE_ANSWER), ("What’s in it?", "Electrolytes – sodium, potassium and magnesium – in a great-tasting mix. We’ll share the full ingredient list before launch.")],
+        "faq": [("Will it have caffeine?", NO_CAFFEINE_ANSWER), ("What’s in it?", "Electrolytes – sodium, potassium and magnesium – with a little cane sugar, in a great-tasting mix. The draft facts panel is above, and we’ll share the full ingredient list before launch.")],
     },
     {
         "file": "recover/index.html", "path": "/recover/", "landing": "generic_post", "brand": "everyday",
@@ -493,7 +516,7 @@ PAGES = [
         "products_title": "Meet Everyday Recovery Mix.",
         "products_lede": "Protein you can mix anywhere, in one easy stick.",
         "question": USE_FREQ,
-        "faq": [("What kind of protein is in it?", PROTEIN_ANSWER), ("What’s in it?", "Protein to support recovery, plus electrolytes, in a great-tasting mix. We’ll share the full ingredient list before launch.")],
+        "faq": [("What kind of protein is in it?", PROTEIN_ANSWER), ("What’s in it?", "20g of protein to support recovery, plus electrolytes, in a great-tasting mix. The draft facts panel is above, and we’ll share the full ingredient list before launch.")],
     },
 ]
 

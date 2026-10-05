@@ -62,6 +62,11 @@ Page copy lives in `tools/build.py`. After editing, rebuild:
 python tools/build.py
 ```
 
+Facts panels: `tools/nutrition.py` holds the draft ingredient build for each
+product, calculates the label values with FDA rounding and draws the panels
+that `build.py` puts on the four ad pages. They are estimates, not lab
+results. `python tools/nutrition.py --export DIR` saves them as PNGs.
+
 Product images are 3D renders: `python tools/make_renders.py` draws the stick
 packs and cartons with three.js (`tools/render3d/index.html` – label designs,
 shapes and camera shots all live there) in headless Edge and saves WebP files
