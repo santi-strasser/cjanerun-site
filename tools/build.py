@@ -3,12 +3,12 @@
 The Meta test compares two brands, one landing page each: CJane Run and a
 neutral control brand ("Everyday"). Both pages share the same layout, form,
 flavors and structure – only the brand, positioning and formulas change. Each
-page shows its two stick packs (before/after a workout) with a draft facts
+page shows its two stick packs (one for before a workout, one for after) with a draft facts
 panel. Edit copy here, then run:
     python tools/build.py
 
 Pages:
-  /            Ad cell: CJane Run – Before + After sticks
+  /            Ad cell: CJane Run – LOCK IN + RECOVER sticks
   /everyday/   Ad cell: Everyday – Hydration Mix + Recovery Mix (control)
   /privacy/    Privacy policy
 """
@@ -124,20 +124,20 @@ BRANDS = {
 # ---------------------------------------------------------------- products
 
 CJR_BEFORE = {
-    "cls": "m-before", "moment": "BEFORE", "name": "Performance stick", "img": "pack-before-single.webp", "panel": "cjr-before", "inside_title": "What’s inside the Before stick",
-    "alt": "Pink CJane Run Before stick pack, strawberry",
+    "cls": "m-before", "moment": "LOCK IN", "name": "Performance stick", "img": "pack-before-single.webp", "panel": "cjr-before", "inside_title": "What’s inside LOCK IN",
+    "alt": "Pink CJane Run LOCK IN stick pack, strawberry",
     "how": "Tear, pour into water and shake about 30 minutes before practice or a game.",
     "facts": [
-        ("Built for", "Hydration, steady energy and focus"),
+        ("Built for", "Built around girls and how they train.<br><mark>Hydration</mark>, <mark>Steady Energy</mark> and <mark>Focus</mark>"),
         ("Flavors we’re exploring", "Strawberry, mixed berry"),
     ],
 }
 CJR_AFTER = {
-    "cls": "m-after", "moment": "AFTER", "name": "Recovery stick", "img": "pack-after-single.webp", "panel": "cjr-after", "inside_title": "What’s inside the After stick",
-    "alt": "Lavender CJane Run After stick pack, matcha",
+    "cls": "m-after", "moment": "RECOVER", "name": "Recovery stick", "img": "pack-after-single.webp", "panel": "cjr-after", "inside_title": "What’s inside RECOVER",
+    "alt": "Matcha-green CJane Run RECOVER stick pack",
     "how": "Mix with water, or blend into a smoothie after training.",
     "facts": [
-        ("Built for", "Protein to rebuild, carbs to refuel, electrolytes to rehydrate"),
+        ("Built for", "Built around girls and how they train.<br>Protein to rebuild, carbs to refuel, electrolytes to rehydrate"),
         ("Flavors we’re exploring", "Matcha, banana, almond"),
     ],
 }
@@ -399,8 +399,8 @@ PAGES = [
         "products_title": "Two moments. One routine.",
         "products_lede": "Light sticks you mix with water – one before practice, one after. Both fit in your gym bag.",
         "faq": [
-            ("Will the Before stick have caffeine?", CAFFEINE_ANSWER),
-            ("What kind of protein is in the After stick?", PROTEIN_ANSWER),
+            ("Will LOCK IN have caffeine?", CAFFEINE_ANSWER),
+            ("What kind of protein is in RECOVER?", PROTEIN_ANSWER),
             ("Is it right for teen athletes?", TEEN_ANSWER),
         ],
     },

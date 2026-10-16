@@ -8,7 +8,7 @@ Klaviyo waitlist with just their email; the page they signed up on
 
 | Page | `signup_page` | Cell |
 |---|---|---|
-| `/` | `cjr` | CJane Run – Before + After sticks |
+| `/` | `cjr` | CJane Run – LOCK IN + RECOVER sticks |
 | `/everyday/` | `everyday` | "Everyday" Hydration Mix + Recovery Mix (neutral control brand) |
 | `/privacy/` | – | Privacy policy |
 

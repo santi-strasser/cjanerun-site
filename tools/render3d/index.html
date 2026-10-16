@@ -29,13 +29,13 @@ const BOX = { w: 10.4, h: 16.4, d: 5.6 };
 
 const PRODUCTS = {
   before: {
-    brand: 'cjr', body: '#E07A93', dark: '#C55F79', ink: '#FFFFFF', accent: NAVY,
-    word: 'BEFORE', sub: 'PERFORMANCE STICK', flavor: 'STRAWBERRY',
+    brand: 'cjr', body: '#E07A93', dark: '#C55F79', ink: '#FFFFFF', accent: NAVY, hl: '#C9627C',
+    word: 'LOCK IN', sub: 'PERFORMANCE STICK', flavor: 'STRAWBERRY',
     claims: ['ENERGY', 'FOCUS', 'HYDRATION'],
   },
   after: {
-    brand: 'cjr', body: '#B3A9D6', dark: '#9A8FC4', ink: NAVY, accent: NAVY,
-    word: 'AFTER', sub: 'RECOVERY STICK', flavor: 'MATCHA',
+    brand: 'cjr', body: '#AFCB84', dark: '#93B25F', ink: NAVY, accent: NAVY, hl: '#4F6E2A',
+    word: 'RECOVER', sub: 'RECOVERY STICK', flavor: 'MATCHA',
     claims: ['REFUEL', 'REBUILD', 'REHYDRATE'],
   },
   hydration: {
@@ -61,6 +61,16 @@ await Promise.all([
 function rng(seed) {             // small deterministic PRNG
   let s = seed >>> 0;
   return () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) ^ Math.imul(s ^ (s >>> 13), 3266489909), (s ^= s >>> 16) >>> 0) / 4294967296);
+}
+
+// Largest font size (up to maxSize) at which `str` is no wider than maxW.
+function fitSize(str, weight, face, spacing, maxW, maxSize) {
+  const ctx = document.createElement('canvas').getContext('2d');
+  for (let s = maxSize; s > 40; s -= 4) {
+    ctx.font = `${weight} ${s}px ${face}`; ctx.letterSpacing = spacing + 'px';
+    if (ctx.measureText(str).width <= maxW) return s;
+  }
+  return 40;
 }
 
 function canvas(w, h) {
@@ -133,7 +143,7 @@ function stickLabel(p) {
     text(ctx, 'CJANE RUN', mid, CRIMP_PX + 250, '700 84px Montserrat', p.ink, 26);
     ctx.fillStyle = p.ink; ctx.globalAlpha = .55; ctx.fillRect(mid - 150, CRIMP_PX + 330, 300, 5); ctx.globalAlpha = 1;
     ctx.save(); ctx.translate(mid + 20, LH * 0.405); ctx.rotate(-Math.PI / 2);
-    text(ctx, p.word, 0, 0, `800 ${p.word.length > 5 ? 290 : 330}px Montserrat`, p.ink, 26);
+    text(ctx, p.word, 0, 0, `800 ${fitSize(p.word, 800, 'Montserrat', 26, 1400, 330)}px Montserrat`, p.ink, 26);
     ctx.restore();
     badge(ctx, mid, LH * 0.715, 140, false);
     text(ctx, p.sub, mid, LH * 0.795, '700 52px Montserrat', p.ink, 9);
@@ -261,12 +271,12 @@ function boxFace(p, kind) {
     const foot = cjr ? NAVY : p.ink, L = w * 0.085;
     if (cjr) {
       badge(ctx, L + 170, h * 0.135, 170, true);
-      text(ctx, p.word, L - 8, h * 0.37, `800 ${p.word.length > 5 ? 215 : 250}px Montserrat`, p.ink, 10, 'left');
+      text(ctx, p.word, L - 8, h * 0.37, `800 ${fitSize(p.word, 800, 'Montserrat', 10, 880, 250)}px Montserrat`, p.ink, 10, 'left');
       text(ctx, p.sub + 'S', L, h * 0.468, '700 58px Montserrat', p.ink, 10, 'left');
       ctx.fillStyle = p.ink; ctx.globalAlpha = .5; ctx.fillRect(L, h * 0.52, 300, 6); ctx.globalAlpha = 1;
       text(ctx, p.flavor, L, h * 0.578, '600 82px Montserrat', p.ink, 16, 'left');
       text(ctx, 'DRINK MIX', L, h * 0.628, '600 44px Montserrat', p.ink, 12, 'left');
-      p.claims.forEach((c, i) => text(ctx, c, L, h * (0.842 + i * 0.047), '700 50px Montserrat', i ? NAVY : '#C9627C', 10, 'left'));
+      p.claims.forEach((c, i) => text(ctx, c, L, h * (0.842 + i * 0.047), '700 50px Montserrat', i ? NAVY : p.hl, 10, 'left'));
     } else {
       text(ctx, 'everyday', L - 6, h * 0.12, '700 210px Inter', p.ink, -6, 'left');
       iconCircle(ctx, L + 150, h * 0.27, 150, p.icon, p.ink);

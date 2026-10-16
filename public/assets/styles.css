@@ -177,9 +177,13 @@ h2 { font-size: clamp(30px, 4.2vw, 46px); font-weight: 700; }
 .product dl { margin: 0; display: grid; gap: 10px; font-size: 15px; }
 .product dt { font-weight: 700; }
 .product dd { margin: 2px 0 0; color: var(--muted); }
+/* Key benefits show as bold pills, e.g. Hydration · Steady Energy · Focus */
+.product dd mark { display: inline-block; margin: 3px 2px 3px 0; padding: 2px 11px 3px; border-radius: 999px; background: var(--pink); color: #fff; font-family: var(--display); font-weight: 700; font-size: 1.05em; letter-spacing: .01em; line-height: 1.35; }
+.theme-everyday .product dd mark { background: var(--navy); }
+.product.feature dd:has(mark) { font-size: 1.05em; line-height: 1.5; }
 
 .m-before .product-art { background: #FBE4EA; } .m-before .moment { color: #C9627C; }
-.m-after .product-art { background: #ECE8F7; } .m-after .moment { color: #7A6DB3; }
+.m-after .product-art { background: #E5EFD3; } .m-after .moment { color: #557333; }
 .m-hydration .product-art { background: #E1F2F6; } .m-hydration .moment { color: #1F7F8C; }
 .m-recovery .product-art { background: #F6EDDF; } .m-recovery .moment { color: #9A6B2F; }
 
