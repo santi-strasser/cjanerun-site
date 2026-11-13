@@ -48,6 +48,13 @@ Old `/pre/`, `/post/`, `/sticks/` and `/bottles/` links redirect to `/`, and
    signups send one `generate_lead` event per visit
    with `signup_page`. In GA, mark `generate_lead` as a key event and register
    `signup_page` as an event-scoped custom dimension.
+3b. **TikTok Pixel (optional, for TikTok campaigns)** – create a pixel in each
+   TikTok ad account (Assets > Events > Web events) and paste the IDs into
+   `tiktokPixelIdCjr` (every page except `/everyday/` and `/privacy/`) and
+   `tiktokPixelIdEveryday` (`/everyday/` pages) in `public/assets/config.js`.
+   Nothing loads while they are empty. The site fires `PageView` on load and a
+   `SubmitForm` event on signup. **Before setting an ID, add TikTok to the
+   privacy policy** (`tools/build.py`, "What we collect" and "Who helps us").
 4. **Contact email** – the site lists `hello@cjanerun.store`. Turn on
    Cloudflare Email Routing for the domain and forward it to your inbox.
 5. **Privacy policy** – `tools/build.py` has a plain-language draft. Have it

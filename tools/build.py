@@ -192,6 +192,7 @@ def head(page, brand):
 <link rel="stylesheet" href="/assets/styles.css">
 <script src="/assets/config.js"></script>
 <script src="/assets/pixel.js"></script>
+<script src="/assets/tiktok.js"></script>
 <script src="/assets/analytics.js"></script>
 <script src="/assets/form.js" defer></script>
 </head>
