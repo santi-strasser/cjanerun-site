@@ -74,19 +74,19 @@ BRANDS = {
         "footer_line": "© 2026 CJane Run · Fuel what’s next.",
         "beliefs": {
             "eyebrow": "Why we exist",
-            "title": "Not another gym-bro supplement.",
-            "lede": "Most sports nutrition was built for someone else. We’re building ours around the athletes who train for what they can do.",
+            "title": "Made for her. Chosen by you.",
+            "lede": "Most sports nutrition was built for someone else. We’re building ours around girls who train – and for the parents who help them fuel.",
             "items": [
-                (ICON_CLOCK, "Built around your training", "Before practice and after it – made to fit real schedules with school, travel games and two-a-days."),
-                (ICON_HEART, "Taste comes first", "If it doesn’t taste great, you won’t use it. We start with flavors you already love and ingredients you recognize."),
-                (ICON_STAR, "Confidence, not diet culture", "We’re about energy, recovery and what your body can do. Never weight loss or body transformation."),
+                (ICON_CLOCK, "Built around her training", "Before practice and after it – made to fit real schedules with school, travel games and two-a-days."),
+                (ICON_HEART, "Taste she’ll actually use", "If it doesn’t taste great, she won’t use it. We start with flavors girls already love and ingredients you recognize."),
+                (ICON_STAR, "Confidence, not diet culture", "We’re about energy, recovery and what her body can do. Never weight loss or body transformation."),
             ],
         },
         "join": {
-            "title": "Help us build CJane Run.",
-            "lede": "We’re developing our products with athletes, not just for them. Join now and help shape what we make.",
+            "title": "Be the first to know – for her.",
+            "lede": "We’re developing our products with athletes and the parents who support them. Join as her parent and help shape what we make.",
         },
-        "who": "Athletes 13 and up who train seriously – high school, club and college – and the parents and coaches who support them.",
+        "who": "Girls who train seriously – high school, club and college athletes – and the parents who support them. This waitlist is for parents and guardians 18 and older.",
     },
     "everyday": {
         "name": "Everyday",
@@ -105,19 +105,19 @@ BRANDS = {
         "footer_line": "© 2026 Everyday",
         "beliefs": {
             "eyebrow": "Why Everyday",
-            "title": "Simple, everyday essentials.",
-            "lede": "Good-for-you basics that taste great and fit into any routine.",
+            "title": "Simple essentials for her busy days.",
+            "lede": "Good-for-you basics that taste great and fit into any routine – from school to practice to the weekend.",
             "items": [
-                (ICON_BAG, "Easy to use", "Tear, pour, shake. One stick fits in any bag, pocket or desk drawer."),
-                (ICON_SMILE, "Tastes great", "Flavors you’ll look forward to, with ingredients you recognize."),
-                (ICON_PEOPLE, "Made for everyone", "For workdays, workouts, travel and everything in between."),
+                (ICON_BAG, "Easy for her to use", "Tear, pour, shake. One stick fits in any backpack, gym bag or locker."),
+                (ICON_SMILE, "Tastes great", "Flavors she’ll look forward to, with ingredients you recognize."),
+                (ICON_PEOPLE, "Made for real routines", "For school days, practices, travel and everything in between."),
             ],
         },
         "join": {
-            "title": "Be the first to try it.",
-            "lede": "We’re getting ready to launch. Join now and help shape what we make.",
+            "title": "Be the first to try it – for her.",
+            "lede": "We’re getting ready to launch. Join as her parent and help shape what we make.",
         },
-        "who": "Anyone who wants an easier way to take care of themselves – at work, at the gym or on the go.",
+        "who": "Teens and young adults with busy schedules – and the parents who help them stay on track. This waitlist is for parents and guardians 18 and older.",
     },
 }
 
@@ -213,18 +213,19 @@ HONEYPOT = '<label class="hp-field" aria-hidden="true"><input type="checkbox" na
 
 def fineprint(brand):
     return (
-        '<p class="fineprint">You must be 13 or older to join. By joining, you agree to '
-        f'{brand["consent"]}. Unsubscribe anytime. <a href="/privacy/">Privacy policy</a>.</p>'
+        '<p class="fineprint">For parents and guardians 18 or older – please don’t enter a child’s email. '
+        f'By joining, you agree to {brand["consent"]}. Unsubscribe anytime. <a href="/privacy/">Privacy policy</a>.</p>'
     )
 
 
 def waitlist_form(brand):
-    """Email is the only thing we ask for."""
+    """Parent's email is the only thing we ask for, plus a confirmation that they are the parent or guardian."""
     return f"""<form class="waitlist-form">
         <div class="field-row">
-          <input class="input" type="email" name="email" placeholder="Your email" autocomplete="email" required aria-label="Email address">
+          <input class="input" type="email" name="email" placeholder="Your email (parent or guardian)" autocomplete="email" required aria-label="Parent or guardian email address">
           <button class="btn" type="submit">Join the waitlist</button>
         </div>
+        <label class="parent-check"><input type="checkbox" name="parent" required> I’m a parent or guardian, 18 or older</label>
         {HONEYPOT}
         <p class="form-status" role="status" aria-live="polite"></p>
         {fineprint(brand)}
@@ -351,6 +352,7 @@ def faq(page, brand):
         ("Can I buy it now?",
          "Not yet – it’s in development. Join the waitlist and you’ll hear first when it’s ready."),
         ("Who is it for?", brand["who"]),
+        ("Why do you ask for a parent’s email?", "The products are made for teen and young adult athletes, and parents make the decisions about what their daughters take. So the waitlist is for parents and guardians 18 and older – we won’t add a child’s email."),
     ] + page["faq"]
     body = "".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in items)
     return f"""<section class="section faq">
@@ -388,37 +390,38 @@ PROTEIN_ANSWER = "A complete, non-dairy protein – 20g per stick. Our current d
 
 PAGES = [
     {
-        "file": "index.html", "path": "/", "landing": "cjr", "brand": "cjr",
-        "title": "CJane Run – Fuel what’s next.",
-        "description": "Great-tasting sports nutrition built around how you actually train. CJane Run is coming soon – join the waitlist.",
-        "h1": 'Fuel what’s <span class="accent">next.</span>',
-        "hero_lede": "Great-tasting nutrition built around how you actually train. Tear, pour, shake – before practice and after it.",
+        "file": "index.html", "path": "/", "landing": "cjr-parents", "brand": "cjr",
+        "title": "CJane Run – Sports nutrition for your daughter",
+        "description": "Great-tasting sports nutrition built around how girls actually train. CJane Run is coming soon – parents, join the waitlist for your daughter.",
+        "h1": 'Fuel her <span class="accent">next.</span>',
+        "hero_lede": "Great-tasting sports nutrition built around how girls actually train. One stick for before practice, one for after – tear, pour, shake. Join the waitlist for your daughter.",
         "art_class": "art-render",
         "hero_art": render("pack-cjr-pair-hero"),
         "products": [CJR_BEFORE, CJR_AFTER],
-        "products_title": "Two moments. One routine.",
-        "products_lede": "Light sticks you mix with water – one before practice, one after. Both fit in your gym bag.",
+        "products_title": "Two moments. One routine for her.",
+        "products_lede": "Light sticks she mixes with water – one before practice, one after. Both fit in her gym bag.",
         "faq": [
             ("Will LOCK IN have caffeine?", CAFFEINE_ANSWER),
             ("What kind of protein is in RECOVER?", PROTEIN_ANSWER),
-            ("Is it right for teen athletes?", TEEN_ANSWER),
+            ("Is it right for my teen athlete?", TEEN_ANSWER),
         ],
     },
     {
-        "file": "everyday/index.html", "path": "/everyday/", "landing": "everyday", "brand": "everyday",
-        "title": "Everyday – Hydration and Recovery Mixes",
-        "description": "Easy drink mixes for everyday hydration and recovery. Join the waitlist.",
-        "h1": 'Hydration and recovery, made <span class="accent">easy.</span>',
-        "hero_lede": "Everyday drink mixes for busy days: a Hydration Mix with electrolytes and a Recovery Mix with protein. Tear, pour, shake – anytime, anywhere.",
+        "file": "everyday/index.html", "path": "/everyday/", "landing": "everyday-parents", "brand": "everyday",
+        "title": "Everyday – Hydration and Recovery Mixes for your daughter",
+        "description": "Easy drink mixes for hydration and recovery, made for your daughter’s busy days. Parents, join the waitlist.",
+        "h1": 'Easy hydration and recovery for <span class="accent">her.</span>',
+        "hero_lede": "Everyday drink mixes for busy school and practice days: a Hydration Mix with electrolytes and a Recovery Mix with protein. Tear, pour, shake. Join the waitlist for your daughter.",
         "art_class": "art-render",
         "hero_art": render("pack-everyday-pair-hero"),
         "products": [EVERYDAY_HYDRATION, EVERYDAY_RECOVERY],
-        "products_title": "Two mixes. One easy routine.",
-        "products_lede": "Light sticks you mix with water – one for hydration, one for recovery. Both fit in any bag.",
+        "products_title": "Two mixes. One easy routine for her.",
+        "products_lede": "Light sticks she mixes with water – one for hydration, one for recovery. Both fit in any backpack.",
         "faq": [
             ("Do they have caffeine?", "Hydration Mix is caffeine-free. Recovery Mix gets a small amount – about 30mg per stick – from its matcha."),
             ("What kind of protein is in Recovery Mix?", PROTEIN_ANSWER),
             ("What’s in them?", "Hydration Mix has electrolytes – sodium, potassium and magnesium – with a little cane sugar. Recovery Mix has 20g of protein plus electrolytes. The draft facts panels are above, and we’ll share full ingredient lists before launch."),
+            ("Is it right for my teen?", TEEN_ANSWER),
         ],
     },
 ]
@@ -452,7 +455,7 @@ def build(page):
 PRIVACY = f"""<section class="legal">
   <div class="wrap">
     <h1>Privacy policy</h1>
-    <p class="updated">Last updated: October 5, 2026</p>
+    <p class="updated">Last updated: November 13, 2026</p>
     <p>CJane Run (“we,” “us”) is a brand in development. This policy explains what we collect on cjanerun.store – including pages for product concepts we test under other names, such as Everyday – and how we use it.</p>
 
     <h2>What we collect</h2>
@@ -482,7 +485,7 @@ PRIVACY = f"""<section class="legal">
     </ul>
 
     <h2>Children</h2>
-    <p>Our waitlists are for people 13 and older. We don’t knowingly collect information from children under 13. If you believe a child under 13 has signed up, email us and we’ll delete it.</p>
+    <p>Our waitlists are for parents and guardians who are 18 or older. We don’t knowingly collect information from anyone under 18. If you believe a minor has signed up, email us and we’ll delete it.</p>
 
     <h2>Changes</h2>
     <p>If we update this policy, we’ll change the date at the top of this page.</p>

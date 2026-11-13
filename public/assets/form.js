@@ -52,8 +52,10 @@
   }
 
   // The page and ad tags go on the profile separately, so a problem here never blocks the signup.
-  function saveSource(email) {
+  function saveSource(email, form) {
     var props = { signup_page: LANDING };
+    var parent = form && form.querySelector('input[name="parent"]');
+    if (parent && parent.checked) props.parent_confirmed = 'yes';
     Object.keys(utms).forEach(function (k) { props[k] = utms[k]; });
     return post('profiles', {
       data: { type: 'profile', attributes: { email: email, properties: props } }
@@ -90,7 +92,7 @@
       subscribe(email)
         .then(function (res) {
           if (!res.ok) throw new Error('Klaviyo ' + res.status);
-          saveSource(email);
+          saveSource(email, form);
           // One Lead per visit, even if someone uses both forms on the page.
           if (!leadTracked) {
             if (window.fbq) window.fbq('track', 'Lead', { content_name: LANDING });

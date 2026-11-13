@@ -152,6 +152,10 @@ h2 { font-size: clamp(30px, 4.2vw, 46px); font-weight: 700; }
 
 .hp-field { position: absolute; left: -9999px; }
 
+.parent-check { display: flex; align-items: flex-start; gap: 10px; margin: 14px 0 0; font-size: 15px; font-weight: 500; cursor: pointer; }
+.parent-check input { width: 20px; height: 20px; flex: 0 0 20px; margin: 1px 0 0; accent-color: var(--pink); cursor: pointer; }
+.hero .parent-check { color: #E4E6EF; }
+
 /* ---------- Beliefs ---------- */
 
 .section { padding: 96px 0; }

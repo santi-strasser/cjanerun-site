@@ -6,13 +6,22 @@ Klaviyo waitlist with just their email; the page they signed up on
 
 ## The test
 
+**Test 2 (from Nov 13, 2026): parents of teen daughters.** The pages are
+daughter-first and parent-facing, and the form only takes a parent or
+guardian's email (adults 18+, with a required "I'm a parent or guardian"
+checkbox). Test 1's pages (athlete audience) are archived in
+`archive/test-1-athlete-audience/` and at git tag `test1-landing-pages`.
+
 | Page | `signup_page` | Cell |
 |---|---|---|
-| `/` | `cjr` | CJane Run – LOCK IN + RECOVER sticks |
-| `/everyday/` | `everyday` | "Everyday" Hydration Mix + Recovery Mix (neutral control brand) |
+| `/` | `cjr-parents` | CJane Run – LOCK IN + RECOVER sticks |
+| `/everyday/` | `everyday-parents` | "Everyday" Hydration Mix + Recovery Mix (neutral control brand) |
 | `/privacy/` | – | Privacy policy |
 
-Both ad pages share the same layout and email-only form – only the brand,
+Klaviyo profiles from test 1 have `signup_page` = `cjr` or `everyday`; test 2
+profiles also get `parent_confirmed` = `yes`.
+
+Both ad pages share the same layout and email form – only the brand,
 positioning and formulas change. They don't link to each other (the logo
 scrolls to the top), so each ad's visitors stay in their cell. "Everyday" is a
 made-up neutral brand; its page discloses in the footer and consent line that
