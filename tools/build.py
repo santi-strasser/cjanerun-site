@@ -394,7 +394,7 @@ PAGES = [
         "file": "index.html", "path": "/", "landing": "cjr-parents", "brand": "cjr",
         "title": "CJane Run – Sports nutrition for your daughter",
         "description": "Great-tasting sports nutrition built around how girls actually train. CJane Run is coming soon – parents, join the waitlist for your daughter.",
-        "h1": 'Fuel her <span class="accent">next.</span>',
+        "h1": 'Help her fuel <span class="accent">what’s next.</span>',
         "hero_lede": "Great-tasting sports nutrition built around how girls actually train. One stick for before practice, one for after – tear, pour, shake. Join the waitlist for your daughter.",
         "art_class": "art-render",
         "hero_art": render("pack-cjr-pair-hero"),
